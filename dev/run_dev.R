@@ -12,4 +12,7 @@ golem::detach_all_attached()
 golem::document_and_reload()
 
 # Run the application
-run_app()
+run_app(
+  credentials_path = "gidb_users.sqlite",
+  credentials_pass = Sys.getenv("GIDB_USERS_PASSPHRASE")
+)

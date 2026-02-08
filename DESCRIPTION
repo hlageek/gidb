@@ -10,7 +10,9 @@ BugReports: https://github.com/hlageek/gidb/issues
 Imports: 
     config,
     golem,
-    shiny
+    openssl,
+    shiny,
+    shinymanager
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

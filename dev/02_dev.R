@@ -92,15 +92,11 @@ credentials <- data.frame(
   user = c("admin"), # mandatory
   password = c("admin"), # mandatory
   admin = c(TRUE),
-  changed = c(FALSE),
   stringsAsFactors = FALSE
 )
 
-con <- DBI::dbConnect(
-  RPostgres::Postgres(),
-  host = Sys.getenv("DB_HOST"),
-  port = Sys.getenv("DB_PORT"),
-  dbname = Sys.getenv("DB_NAME"),
-  user = Sys.getenv("DB_USER"),
-  password = Sys.getenv("DB_PASS")
+shinymanager::create_db(
+  credentials_data = credentials,
+  sqlite_path = "gidb_users.sqlite", # will be created
+  passphrase = Sys.getenv("GIDB_USERS_PASSPHRASE")
 )
