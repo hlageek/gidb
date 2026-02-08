@@ -1,0 +1,21 @@
+Package: gidb
+Title: Management tool for GameIndex Database
+Version: 0.0.0.9000
+Authors@R: 
+    person("Radim", "Hladík", , "radim.hladik@fulbrightmail.org", role = c("aut", "cre"))
+Description: A shiny app to manage GameIndex Database.
+License: What license is it under?
+URL: https://github.com/hlageek/gidb
+BugReports: https://github.com/hlageek/gidb/issues
+Imports: 
+    config,
+    golem,
+    shiny
+Suggests: 
+    spelling,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+RoxygenNote: 7.3.3
