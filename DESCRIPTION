@@ -12,7 +12,8 @@ Imports:
     golem,
     openssl,
     shiny,
-    shinymanager
+    shinymanager,
+    bslib
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

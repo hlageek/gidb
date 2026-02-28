@@ -11,7 +11,20 @@ app_ui <- function(request) {
     # Your application UI logic
     fluidPage(
       h1("gidb"),
-      "Hello", # Remove this line to start building your UI
+      shiny::tabsetPanel(
+        id = "tabs",
+        type = "tabs",
+        tabPanel(
+          title = "Data preview",
+          value = "data_preview",
+          mod_data_preview_ui("data_preview_1")
+        ),
+        tabPanel(
+          title = "Data editor",
+          value = "data_editor",
+          mod_data_editor_ui("data_editor_1")
+        )
+      )
     )
   )
 }
