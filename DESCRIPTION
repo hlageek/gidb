@@ -13,7 +13,8 @@ Imports:
     openssl,
     shiny,
     shinymanager,
-    bslib
+    bslib,
+    httr2
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

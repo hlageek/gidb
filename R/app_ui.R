@@ -9,7 +9,7 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
+    bslib::page_fluid(
       h1("gidb"),
       shiny::tabsetPanel(
         id = "tabs",

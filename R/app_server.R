@@ -14,7 +14,5 @@ app_server <- function(input, output, session) {
     timeout = 60
   )
 
-  output$auth_output <- renderPrint({
-    reactiveValuesToList(auth)
-  })
+  mod_data_editor_server("data_editor_1")
 }
