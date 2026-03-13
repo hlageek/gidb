@@ -30,7 +30,6 @@ get_igdb_token <- function(client_id, client_secret) {
 
 # token <- get_igdb_token("your_client_id", "your_client_secret")
 # access_token <- token$access_token
-
 get_igdb_game <- function(igdb_id, client_id, access_token) {
   httr2::request("https://api.igdb.com/v4/games") |>
     httr2::req_headers(
@@ -39,7 +38,7 @@ get_igdb_game <- function(igdb_id, client_id, access_token) {
     ) |>
     httr2::req_body_raw(
       paste0(
-        "fields name, first_release_date, genres, involved_companies, url; where id = ",
+        "fields name, first_release_date, genres, themes, involved_companies, url; where id = ",
         igdb_id,
         ";"
       )
@@ -48,4 +47,5 @@ get_igdb_game <- function(igdb_id, client_id, access_token) {
     httr2::resp_body_json()
 }
 
-# game <- get_igdb_game(1234, "your_client_id", access_token)
+# game <- get_igdb_game(902, "t6hs7slsu8b07ejiebhr2updw1sqs5", access_token)
+#game

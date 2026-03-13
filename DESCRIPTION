@@ -14,7 +14,11 @@ Imports:
     shiny,
     shinymanager,
     bslib,
-    httr2
+    httr2,
+    shinyjs,
+    bsicons,
+    purrr,
+    tools
 Suggests: 
     spelling,
     testthat (>= 3.0.0)
