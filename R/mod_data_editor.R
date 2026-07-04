@@ -364,9 +364,12 @@ mod_data_editor_ui <- function(id) {
 #' data_editor Server Function
 #'
 #' @noRd
-mod_data_editor_server <- function(id) {
+mod_data_editor_server <- function(id, pool, user) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    observe(print(user))
+
+    observeEvent(req(user$name), print(pool::dbListTables(pool)))
 
     # ── Reactive state ────────────────────────────────────────────────────────
 

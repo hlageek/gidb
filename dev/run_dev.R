@@ -13,6 +13,9 @@ golem::document_and_reload()
 
 # Run the application
 run_app(
+  dbname = Sys.getenv("DB_NAME"),
+  dbusername = Sys.getenv("DB_USER"),
+  dbpassword = Sys.getenv("DB_PASS"),
   credentials_path = "gidb_users.sqlite",
   credentials_pass = Sys.getenv("GIDB_USERS_PASSPHRASE")
 )

@@ -5,6 +5,11 @@
 \title{Run the Shiny Application}
 \usage{
 run_app(
+  dbhost = "localhost",
+  dbport = 5432L,
+  dbname = NULL,
+  dbusername = NULL,
+  dbpassword = NULL,
   credentials_path = NULL,
   credentials_pass = NULL,
   onStart = NULL,

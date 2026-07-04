@@ -18,7 +18,9 @@ Imports:
     shinyjs,
     bsicons,
     purrr,
-    tools
+    tools,
+    pool,
+    RPostgres
 Suggests: 
     spelling,
     testthat (>= 3.0.0)
