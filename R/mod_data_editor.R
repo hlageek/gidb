@@ -90,8 +90,21 @@ mod_data_editor_server <- function(id, pool, user) {
     })
 
     output$editor <- renderUI({
-      if (input$entry_mode == "auto") {
-        NULL
+      if (input$entry_mode == "auto" && isTruthy(loc$mobygames_called)) {
+        bslib::accordion(
+          id = ns("game_accordion"),
+          open = TRUE,
+          multiple = TRUE,
+          panel_identifiers(
+            ns = ns,
+            identifiers = game_data$identifiers
+          ),
+          panel_core(ns = ns, info = game_data$info),
+          panel_tags(ns = ns),
+          panel_platforms(ns = ns),
+          panel_originators(ns = ns),
+          panel_notes(ns = ns)
+        )
       } else if (input$entry_mode == "edit") {
         NULL
       } else if (input$entry_mode == "manual") {
@@ -404,6 +417,79 @@ mod_data_editor_server <- function(id, pool, user) {
       ignoreInit = TRUE,
       ignoreNULL = FALSE
     )
+
+    # MobyGames API ----------------------
+
+    observeEvent(input$retrieve_mobygames, {
+      req(input$mobygames_id)
+      showNotification("Initiating API call", type = "message")
+
+      result <- tryCatch(
+        moby_get_game_metadata(input$mobygames_id),
+        error = function(e) {
+          showNotification(
+            paste("Fetch failed:", conditionMessage(e)),
+            type = "error"
+          )
+          NULL
+        }
+      )
+
+      req(result)
+
+      game_data$info <- list(
+        title = result$moby_title,
+        release_year = result$release_date,
+        description = strip_html(result$description),
+        official_url = result$official_url
+      )
+
+      game_data$identifiers <- list(
+        moby_id = result$moby_id
+      )
+
+      # tags: nested by category (basic_genres, perspective, ...) -> flatten to
+      # list(list(name, category), ...)
+      flat_tags <- purrr::imap(result$tags, function(entries, category) {
+        category_label <- category |>
+          gsub("_", " ", x = _) |>
+          tools::toTitleCase()
+        purrr::map(entries, function(t) {
+          list(name = t$name %||% "", category = category_label)
+        })
+      }) |>
+        purrr::flatten()
+
+      game_data$game_tags <- if (length(flat_tags) > 0) {
+        unname(flat_tags)
+      } else {
+        list(list(name = "", category = ""))
+      }
+
+      game_data$platforms <- if (length(result$platforms) > 0) {
+        purrr::map(result$platforms, function(p) {
+          list(name = p$platform_name %||% "", year = p$release_year %||% NA)
+        })
+      } else {
+        list(list(name = "", year = NA))
+      }
+
+      # originators: no location field from MobyGames — left blank for manual fill-in
+      game_data$originators <- if (length(result$originators) > 0) {
+        purrr::map(result$originators, function(o) {
+          list(
+            name = o$company_name %||% "",
+            role = o$role %||% "",
+            location = ""
+          )
+        })
+      } else {
+        list(list(name = "", role = "", location = ""))
+      }
+
+      showNotification(paste("Loaded:", result$moby_title), type = "message")
+      loc$mobygames_called <- TRUE
+    })
 
     # ── Preview module ────────────────────────────────────────────────────────
     preview <- mod_game_card_server(

@@ -22,6 +22,7 @@ default_game_data <- function() {
         location = NULL
       )
     ),
-    notes = NULL
+    notes = NULL,
+    mobygames_called = NULL
   )
 }

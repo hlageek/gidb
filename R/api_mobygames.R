@@ -226,7 +226,7 @@ moby_get_game_metadata <- function(game_id, include_originators = TRUE) {
     )
   }
 
-  list(
+  res <- list(
     moby_id = game$game_id,
     moby_title = game$title,
     moby_url = game$moby_url,
@@ -238,6 +238,8 @@ moby_get_game_metadata <- function(game_id, include_originators = TRUE) {
     platforms = platforms,
     originators = originators
   )
+  print(res)
+  res
 }
 
 
