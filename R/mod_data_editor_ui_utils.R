@@ -283,7 +283,7 @@ panel_originators_ui <- function(
           options = list(create = TRUE, placeholder = "Select or type…")
         ),
         selectizeInput(
-          ns(paste0("originator_location", i)),
+          ns(paste0("originator_location_", i)),
           label = if (i == 1) "Location" else NULL,
           choices = union(originators_opts$location, originator$location) %||%
             NULL,

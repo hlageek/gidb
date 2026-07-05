@@ -40,7 +40,7 @@ mod_game_card_ui <- function(id) {
     bslib::card_body(
       class = "p-3",
       style = "overflow-y: visible;",
-      uiOutput(ns("preview_content"))
+      uiOutput(ns("preview_content"), style = "display: block;")
     )
   )
 }

@@ -205,7 +205,45 @@ mod_data_editor_server <- function(id, pool, user) {
       input$rm_tag_clicked,
       loc$n_game_tags <- loc$n_game_tags - 1L
     )
-
+    # Observers for update -------------------------
+    shiny::observeEvent(
+      list(
+        input$id_mobygames,
+        input$id_igdb,
+        input$id_steam,
+        input$id_gog,
+        input$id_itch
+      ),
+      {
+        game_data$identifiers <- list(
+          moby_id = input$id_mobygames,
+          id_igdb = input$id_igdb,
+          steam_id = input$id_steam,
+          gog_id = input$id_gog,
+          itch_id = input$id_itch
+        )
+      },
+      ignoreInit = TRUE,
+      ignoreNULL = FALSE
+    )
+    shiny::observeEvent(
+      list(
+        input$title,
+        input$release_year,
+        input$official_url,
+        input$description
+      ),
+      {
+        game_data$info <- list(
+          title = input$title,
+          release_year = input$release_year,
+          official_url = input$official_url,
+          description = strip_html(input$description)
+        )
+      },
+      ignoreInit = TRUE,
+      ignoreNULL = FALSE
+    )
     observe({
       n <- length(isolate(game_data$game_tags))
       purrr::walk(seq_len(loc$n_game_tags), function(i) {
@@ -218,6 +256,45 @@ mod_data_editor_server <- function(id, pool, user) {
 
         if (!is.null(input[[cat_id]])) {
           game_data$game_tags[[i]]$category <- input[[cat_id]]
+        }
+      })
+    })
+    observe({
+      n <- length(isolate(game_data$platforms))
+      purrr::walk(seq_len(n), function(i) {
+        name_id <- paste0("platform_", i)
+        year_id <- paste0("platform_year_", i)
+        if (!is.null(input[[name_id]])) {
+          game_data$platforms[[i]]$name <- input[[name_id]]
+        }
+        if (!is.null(input[[year_id]])) {
+          game_data$platforms[[i]]$year <- input[[year_id]]
+        }
+      })
+    })
+    observe({
+      n <- length(isolate(game_data$originators))
+      purrr::walk(seq_len(n), function(i) {
+        name_id <- paste0("originator_", i)
+        role_id <- paste0("originator_role_", i)
+        location_id <- paste0("originator_location_", i) # matches your current UI id (see note below)
+        if (!is.null(input[[name_id]])) {
+          game_data$originators[[i]]$name <- input[[name_id]]
+        }
+        if (!is.null(input[[role_id]])) {
+          game_data$originators[[i]]$role <- input[[role_id]]
+        }
+        if (!is.null(input[[location_id]])) {
+          game_data$originators[[i]]$location <- input[[location_id]]
+        }
+      })
+    })
+    observe({
+      n <- length(isolate(game_data$notes))
+      purrr::walk(seq_len(n), function(i) {
+        note_id <- paste0("note_", i)
+        if (!is.null(input[[note_id]])) {
+          game_data$notes[[i]] <- input[[note_id]]
         }
       })
     })
