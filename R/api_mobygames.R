@@ -238,8 +238,6 @@ moby_get_game_metadata <- function(game_id, include_originators = TRUE) {
     platforms = platforms,
     originators = originators
   )
-  print(res)
-  res
 }
 
 
