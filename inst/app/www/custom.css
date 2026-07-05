@@ -1,0 +1,129 @@
+ /* ── Layout ── */
+      .editor-layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 1rem;
+        align-items: start;
+        overflow-y: visible;
+      }
+      .preview-panel {
+        position: sticky;
+        top: 1rem;
+        margin-bottom: 5rem;
+        overflow-y: visible;
+      }
+      .editor-panel {
+        overflow-y: visible;
+        padding-right: 0.25rem;
+        margin-bottom: 5rem;
+      }
+
+      /* ── Accordion headers ── */
+      .accordion-button {
+        background-color: #f8f9fa !important;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+      .accordion-button:not(.collapsed) {
+        background-color: #e9ecef !important;
+        color: inherit;
+        box-shadow: none;
+      }
+
+      /* ── Preview typography ── */
+      .preview-section-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #6c757d;
+        margin-bottom: 0.3rem;
+        margin-top: 0.8rem;
+      }
+      .preview-title-link {
+        color: inherit;
+        text-decoration: none;
+      }
+      .preview-title-link:hover {
+        text-decoration: underline;
+        color: #0d6efd;
+      }
+      .preview-description {
+        font-size: 0.8rem;
+        color: #495057;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        cursor: pointer;
+        line-height: 1.4;
+        transition: all 0.2s ease;
+      }
+      .preview-description.expanded {
+        -webkit-line-clamp: unset;
+        overflow: visible;
+      }
+
+      /* ── Pills ── */
+      .pill-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        min-height: 1.6rem;
+      }
+      .preview-pill {
+        display: inline-block;
+        max-width: 160px;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background: #e9ecef;
+        color: #343a40;
+        cursor: default;
+        transition: max-width 0.25s ease, background 0.15s ease;
+        position: relative;
+      }
+      .preview-pill:hover {
+        max-width: 400px;
+        z-index: 10;
+      }
+      .preview-pill.pill-tag      { background: #cfe2ff; color: #084298; }
+      .preview-pill.pill-tag:hover { background: #9ec5fe; }
+      .preview-pill.pill-platform  { background: #d1e7dd; color: #0a3622; }
+      .preview-pill.pill-platform:hover { background: #a3cfbb; }
+      .preview-pill.pill-note      { background: #fff3cd; color: #664d03; }
+      .preview-pill.pill-note:hover { background: #ffe69c; }
+      .preview-pill.pill-id        { background: #f8d7da; color: #58151c; font-family: monospace; }
+      .preview-pill.pill-id:hover  { background: #f1aeb5; }
+
+      /* ── Originator mini-table ── */
+      .orig-table {
+        width: 100%;
+        font-size: 0.78rem;
+        border-collapse: collapse;
+      }
+      .orig-table td {
+        padding: 0.18rem 0.4rem 0.18rem 0;
+        vertical-align: top;
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: max-width 0.2s ease;
+      }
+      .orig-table td:hover {
+        white-space: normal;
+        max-width: 300px;
+      }
+      .orig-table .orig-name { font-weight: 500; color: #212529; }
+      .orig-table .orig-role { color: #6c757d; font-style: italic; }
+      .orig-table .orig-loc  { color: #6c757d; font-size: 0.72rem; }
+      .orig-table tr + tr td { border-top: 1px solid #f0f0f0; padding-top: 0.3rem; }
+
+      .preview-empty {
+        color: #adb5bd;
+        font-size: 0.8rem;
+        font-style: italic;
+      }

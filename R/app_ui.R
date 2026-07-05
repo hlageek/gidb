@@ -8,6 +8,8 @@ app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
+    # Shinyjs
+    shinyjs::useShinyjs(),
     # Your application UI logic
     bslib::page_fluid(
       h1("gidb"),
