@@ -79,39 +79,7 @@ mod_data_editor_server <- function(id, pool, user) {
       current_notes_token = NULL
     )
 
-    game_data <- reactiveValues(
-      info = list(
-        title = "Test game title",
-        release_year = 7L,
-        description = "my desc",
-        official_url = "https://example.com"
-      ),
-      identifiers = list(
-        moby_id = 7L
-      ), # named list label → value
-      game_tags = list(
-        list(name = "Action", category = "Basic Genres"),
-        list(name = "Third-person", category = "Perspective"),
-        list(name = "Puzzle-solving", category = "Gameplay")
-      ), # tags: list of list(name, category)
-      platforms = list(
-        list(name = "Windows", year = "1998"),
-        list(name = "PlayStation", year = "1999")
-      ), # list of list(name, year) — structured, not strings
-      originators = list(
-        list(
-          name = "Looking Glass Studios",
-          role = "developer",
-          location = "Cambridge, United States, US"
-        ),
-        list(
-          name = "Eidos Interactive",
-          role = "publisher",
-          location = "London, United Kingdom, GB"
-        )
-      ), # list of list(name, role, location)
-      notes = c("Great atmosphere", "Check for a widescreen patch") # character vector
-    )
+    game_data <- do.call(reactiveValues, default_game_data())
 
     observeEvent(input$mobygames_id, {
       if (isTruthy(input$mobygames_id)) {

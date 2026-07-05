@@ -154,8 +154,16 @@ mod_game_card_server <- function(id, values) {
         },
         hr(class = "my-2"),
         # Identifiers
+        # Identifiers
         {
           ids <- values$identifiers
+          ids <- ids[
+            !vapply(
+              ids,
+              function(v) is.null(v) || !nzchar(as.character(v)),
+              logical(1)
+            )
+          ]
           if (length(ids) > 0) {
             .preview_section(
               "Identifiers",
