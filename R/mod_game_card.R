@@ -109,7 +109,6 @@ mod_game_card_ui <- function(id) {
 #' @noRd
 mod_game_card_server <- function(id, values) {
   moduleServer(id, function(input, output, session) {
-    observe(print(reactiveValuesToList(values)))
     output$preview_content <- renderUI({
       # Title — linked if official_url is set
       title_el <- if (
@@ -219,10 +218,14 @@ mod_game_card_server <- function(id, values) {
           "Platforms",
           .pill_row(
             purrr::map_chr(values$platforms %||% list(), function(p) {
-              if (nchar(p$year) > 0) {
-                paste0(p$name, " (", p$year, ")")
+              yr <- p$year
+              has_year <- !is.null(yr) &&
+                !is.na(yr) &&
+                nchar(as.character(yr)) > 0
+              if (has_year) {
+                paste0(p$name %||% "", " (", yr, ")")
               } else {
-                p$name
+                p$name %||% ""
               }
             }),
             "pill-platform"

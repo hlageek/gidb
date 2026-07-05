@@ -137,25 +137,25 @@ panel_tags <- function(ns = ns) {
   )
 }
 
-panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL) {
+panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL, token) {
   tagList(
     !!!purrr::imap(game_tags, function(game_tag, i) {
       bslib::layout_columns(
         col_widths = c(5, 6, 1),
         selectizeInput(
-          ns(paste0("tag_cat_", i)),
+          ns(paste0("tag_cat_", token, "_", i)),
           label = if (i == 1) "Category" else NULL,
-          choices = union(game_tags_opts$category, game_tag$category) %||% NULL,
-          selected = game_tag$category %||% NULL,
+          choices = c("", union(game_tags_opts$category, game_tag$category)),
+          selected = game_tag$category %||% "",
           multiple = FALSE,
           width = "100%",
           options = list(create = TRUE, placeholder = "Select or type…")
         ),
         selectizeInput(
-          ns(paste0("tag_name_", i)),
+          ns(paste0("tag_name_", token, "_", i)),
           label = if (i == 1) "Tag name" else NULL,
-          choices = game_tags_opts$name %||% NULL,
-          selected = game_tag$name %||% NULL,
+          choices = c("", union(game_tags_opts$name, game_tag$name)),
+          selected = game_tag$name %||% "",
           multiple = FALSE,
           width = "100%",
           options = list(create = TRUE, placeholder = "Select or type…")
@@ -163,7 +163,7 @@ panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL) {
         div(
           style = if (i == 1) "padding-top: 1.85rem;" else "",
           actionButton(
-            ns(paste0("rm_tag_", i)),
+            ns(paste0("rm_tag_", token, "_", i)),
             NULL,
             icon = icon("minus"),
             class = "btn-outline-danger btn-sm",
@@ -184,7 +184,6 @@ panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL) {
     )
   )
 }
-
 # # ── Platforms ──────────────────────────────────────────────────────────
 panel_platforms <- function(ns = ns) {
   bslib::accordion_panel(
@@ -194,34 +193,39 @@ panel_platforms <- function(ns = ns) {
   )
 }
 
-panel_platforms_ui <- function(ns, platforms = NULL, platforms_opts = NULL) {
+panel_platforms_ui <- function(
+  ns,
+  platforms = NULL,
+  platforms_opts = NULL,
+  token
+) {
   tagList(
     !!!purrr::imap(platforms, function(platform, i) {
       bslib::layout_columns(
         col_widths = c(5, 6, 1),
         selectizeInput(
-          ns(paste0("platform_", i)),
+          ns(paste0("platform_", token, "_", i)),
           label = if (i == 1) "Platform" else NULL,
-          choices = union(platforms_opts, platform$name) %||% NULL,
-          ,
-          selected = platform$name %||% NULL,
+          choices = c("", union(platforms_opts, platform$name)),
+          selected = platform$name %||% "",
           multiple = FALSE,
           width = "100%",
           options = list(create = TRUE, placeholder = "Select or type…")
         ),
         numericInput(
-          ns(paste0("platform_year_", i)),
+          ns(paste0("platform_year_", token, "_", i)),
           label = if (i == 1) "Release year" else NULL,
           value = as.numeric(platform$year %||% NA),
           min = 1950,
           max = as.numeric(format(Sys.Date(), "%Y")) + 5,
           step = 1,
-          width = "100%"
+          width = "100%",
+          updateOn = "blur"
         ),
         div(
           style = if (i == 1) "padding-top: 1.85rem;" else "",
           actionButton(
-            ns(paste0("rm_platform_", i)),
+            ns(paste0("rm_platform_", token, "_", i)),
             NULL,
             icon = icon("minus"),
             class = "btn-outline-danger btn-sm",
@@ -252,43 +256,42 @@ panel_originators <- function(ns = ns) {
   )
 }
 
-
 panel_originators_ui <- function(
   ns,
   originators = NULL,
-  originators_opts = NULL
+  originators_opts = NULL,
+  token
 ) {
   tagList(
     !!!purrr::imap(originators, function(originator, i) {
       bslib::layout_columns(
         col_widths = c(5, 2, 4, 1),
         selectizeInput(
-          ns(paste0("originator_", i)),
+          ns(paste0("originator_", token, "_", i)),
           label = if (i == 1) "Originator" else NULL,
-          choices = union(originators_opts$name, originator$name) %||% NULL,
-          ,
-          selected = originator$name %||% NULL,
+          choices = c("", union(originators_opts$name, originator$name)),
+          selected = originator$name %||% "",
           multiple = FALSE,
           width = "100%",
           options = list(create = TRUE, placeholder = "Select or type…")
         ),
         selectizeInput(
-          ns(paste0("originator_role_", i)),
+          ns(paste0("originator_role_", token, "_", i)),
           label = if (i == 1) "Role" else NULL,
-          choices = union(originators_opts$role, originator$role) %||% NULL,
-          ,
-          selected = originator$role %||% NULL,
+          choices = c("", union(originators_opts$role, originator$role)),
+          selected = originator$role %||% "",
           multiple = FALSE,
           width = "100%",
           options = list(create = TRUE, placeholder = "Select or type…")
         ),
         selectizeInput(
-          ns(paste0("originator_location_", i)),
+          ns(paste0("originator_location_", token, "_", i)),
           label = if (i == 1) "Location" else NULL,
-          choices = union(originators_opts$location, originator$location) %||%
-            NULL,
-          ,
-          selected = originator$location %||% NULL,
+          choices = c(
+            "",
+            union(originators_opts$location, originator$location)
+          ),
+          selected = originator$location %||% "",
           multiple = FALSE,
           width = "100%",
           options = list(create = TRUE, placeholder = "Select or type…")
@@ -297,7 +300,7 @@ panel_originators_ui <- function(
         div(
           style = if (i == 1) "padding-top: 1.85rem;" else "",
           actionButton(
-            ns(paste0("rm_originator_", i)),
+            ns(paste0("rm_originator_", token, "_", i)),
             NULL,
             icon = icon("minus"),
             class = "btn-outline-danger btn-sm",
@@ -328,20 +331,20 @@ panel_notes <- function(ns = ns) {
   )
 }
 
-panel_notes_ui <- function(ns, notes) {
+panel_notes_ui <- function(ns, notes, token) {
   tagList(
     !!!purrr::imap(notes, function(note, i) {
       bslib::layout_columns(
         col_widths = c(11, 1),
         text_area_blur(
-          ns(paste0("note_", i)),
+          ns(paste0("note_", token, "_", i)),
           "Notes",
           value = note
         ),
         div(
           style = if (i == 1) "padding-top: 1.85rem;" else "",
           actionButton(
-            ns(paste0("rm_originator_", i)),
+            ns(paste0("rm_note_", token, "_", i)),
             NULL,
             icon = icon("minus"),
             class = "btn-outline-danger btn-sm",
