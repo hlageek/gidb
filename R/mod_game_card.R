@@ -1,8 +1,8 @@
 #' game_card UI Function
 #'
 #' @description A shiny Module rendering the read-only preview panel for a
-#'   game record. Purely presentational — reads from a `values`
-#'   reactiveValues object supplied by the caller.
+#'   game record. Purely presentational — reads from a `game_data`
+#'   reactivegame_data object supplied by the caller.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
@@ -29,7 +29,7 @@ mod_game_card_ui <- function(id) {
           class = "btn-outline-secondary btn-sm"
         ),
         actionButton(
-          ns("confirm"),
+          ns("save"),
           "Save",
           icon = icon("floppy-disk"),
           class = "btn-success btn-sm",
@@ -49,14 +49,14 @@ mod_game_card_ui <- function(id) {
 
 #' Pill row.
 #' @noRd
-.pill_row <- function(values, pill_class = "preview-pill") {
-  values <- values[!is.na(values) & nchar(values) > 0]
-  if (length(values) == 0) {
+.pill_row <- function(game_data, pill_class = "preview-pill") {
+  game_data <- game_data[!is.na(game_data) & nchar(game_data) > 0]
+  if (length(game_data) == 0) {
     return(span(class = "preview-empty", "—"))
   }
   div(
     class = "pill-wrap",
-    lapply(values, function(v) {
+    lapply(game_data, function(v) {
       span(class = paste("preview-pill", pill_class), title = v, v)
     })
   )
@@ -101,29 +101,34 @@ mod_game_card_ui <- function(id) {
 #' game_card Server Function
 #'
 #' @param id Module id.
-#' @param values A `reactiveValues` object (e.g. the parent module's `loc`)
+#' @param game_data A `reactivegame_data` object (e.g. the parent module's `loc`)
 #'   with fields: title, release_year, description, official_url,
 #'   identifiers, tags, platforms, originators, notes. Passed by reference,
 #'   so changes made by the caller are reflected reactively here.
 #'
 #' @noRd
-mod_game_card_server <- function(id, values) {
+mod_game_card_server <- function(id, game_data) {
   moduleServer(id, function(input, output, session) {
+    return_values <- reactiveValues(
+      reset_flag = 0,
+      saved_flag = 0
+    )
+
     output$preview_content <- renderUI({
       # Title — linked if official_url is set
       title_el <- if (
-        !is.null(values$info$title) && nchar(values$info$title) > 0
+        !is.null(game_data$info$title) && nchar(game_data$info$title) > 0
       ) {
-        url <- values$info$official_url %||% ""
+        url <- game_data$info$official_url %||% ""
         if (nchar(url) > 0) {
           tags$a(
             class = "preview-title-link",
             href = url,
             target = "_blank",
-            values$info$title
+            game_data$info$title
           )
         } else {
-          values$info$title
+          game_data$info$title
         }
       } else {
         span(class = "preview-empty", "No title yet")
@@ -135,12 +140,12 @@ mod_game_card_server <- function(id, values) {
             class = "small text-muted",
             bsicons::bs_icon("calendar3"),
             " ",
-            values$info$release_year %||% "—"
+            game_data$info$release_year %||% "—"
           )
         ),
         # Description
         {
-          desc <- values$info$description %||% ""
+          desc <- game_data$info$description %||% ""
           if (nchar(desc) > 0) {
             tagList(
               hr(class = "my-2"),
@@ -156,7 +161,7 @@ mod_game_card_server <- function(id, values) {
         # Identifiers
         # Identifiers
         {
-          ids <- values$identifiers
+          ids <- game_data$identifiers
           ids <- ids[
             !vapply(
               ids,
@@ -183,7 +188,7 @@ mod_game_card_server <- function(id, values) {
         # Tags — single "Tags" label, each category inline as plain text
         # before its pills
         {
-          tags <- values$game_tags
+          tags <- game_data$game_tags
           tags <- tags[purrr::map_lgl(tags, \(t) nchar(t$name %||% "") > 0)]
           if (length(tags) > 0) {
             cats <- unique(purrr::map_chr(tags, \(t) t$category %||% ""))
@@ -225,7 +230,7 @@ mod_game_card_server <- function(id, values) {
         .preview_section(
           "Platforms",
           .pill_row(
-            purrr::map_chr(values$platforms %||% list(), function(p) {
+            purrr::map_chr(game_data$platforms %||% list(), function(p) {
               yr <- p$year
               has_year <- !is.null(yr) &&
                 !is.na(yr) &&
@@ -240,16 +245,31 @@ mod_game_card_server <- function(id, values) {
           )
         ),
         # Originators
-        .preview_section("Originators", .originator_table(values$originators)),
+        .preview_section(
+          "Originators",
+          .originator_table(game_data$originators)
+        ),
         # Notes
         {
-          notes <- values$notes %||% character(0)
+          notes <- game_data$notes %||% character(0)
           if (length(notes) > 0) {
             .preview_section("Notes", .pill_row(notes, "pill-note"))
           }
         }
       )
     })
+
+    observeEvent(input$reset, {
+      return_values$reset_flag <- return_values$reset_flag + 1
+    })
+
+    observeEvent(input$save, {
+      return_values$saved_flag <- return_values$saved_flag + 1
+    })
+
+    return(
+      return_values
+    )
   })
 }
 

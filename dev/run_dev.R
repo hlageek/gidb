@@ -2,7 +2,7 @@
 options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode
 
 # Comment this if you want the app to be served on a random port
-options(shiny.port = 6969)
+options(shiny.port = 6969, shiny.fullstacktrace = TRUE)
 
 # Detach all loaded packages and clean your environment
 golem::detach_all_attached()

@@ -6,3 +6,11 @@ strip_html <- function(x) {
   }
   gsub("\\s+", " ", trimws(gsub("<[^>]+>", " ", x)))
 }
+
+sql_null <- function(x) {
+  if (is.null(x) || x == "" || length(x) == 0) {
+    DBI::SQL("NULL")
+  } else {
+    x
+  }
+}

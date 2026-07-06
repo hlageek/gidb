@@ -6,7 +6,7 @@
 #' @noRd
 app_server <- function(input, output, session, pool) {
   # Authentication
-  glob <- reactiveValues(user = NULL)
+  user <- reactiveValues(user = NULL)
 
   res_auth <- shinymanager::secure_server(
     check_credentials = shinymanager::check_credentials(
@@ -16,9 +16,10 @@ app_server <- function(input, output, session, pool) {
     timeout = 60
   )
   observeEvent(req(res_auth), {
-    glob$user <- reactiveValuesToList(res_auth)
-    names(glob$user)[names(glob$user) == "user"] <- "name"
+    user <- reactiveValuesToList(res_auth)
+    names(user)[names(user) == "user"] <- "name"
+    user$id <- 1
   })
 
-  mod_data_editor_server("data_editor_1", pool = pool, user = glob$user)
+  mod_data_editor_server("data_editor_1", pool = pool, user = user)
 }

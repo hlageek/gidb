@@ -492,10 +492,27 @@ mod_data_editor_server <- function(id, pool, user) {
     })
 
     # ── Preview module ────────────────────────────────────────────────────────
-    preview <- mod_game_card_server(
+    game_card_server <- mod_game_card_server(
       "game_card_1",
-      values = game_data
+      game_data = game_data
     )
+    observeEvent(game_card_server$reset_flag, {
+      if (game_card_server$reset_flag > 0) {
+        showNotification("Reset game data", type = "message")
+      }
+    })
+
+    observeEvent(game_card_server$saved_flag, {
+      if (game_card_server$saved_flag > 0) {
+        showNotification("Saved game data", type = "message")
+        save_game_data(
+          pool = pool,
+          game_data = game_data,
+          user_id = user$id,
+          game_id = loc$game_id
+        )
+      }
+    })
   })
 }
 
