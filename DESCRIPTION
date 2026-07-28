@@ -7,7 +7,7 @@ Description: A shiny app to manage GameIndex Database.
 License: What license is it under?
 URL: https://github.com/hlageek/gidb
 BugReports: https://github.com/hlageek/gidb/issues
-Imports: 
+Imports:
     config,
     golem,
     openssl,
@@ -18,9 +18,12 @@ Imports:
     shinyjs,
     bsicons,
     purrr,
+    dplyr,
     tools,
     pool,
-    RPostgres
+    RPostgres,
+    DT,
+    glue
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

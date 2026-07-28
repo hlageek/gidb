@@ -23,6 +23,32 @@ text_input_blur <- function(
   tag
 }
 
+#' SelectizeInput that fires only on blur.
+#' @noRd
+selectize_input_blur <- function(
+  inputId,
+  label,
+  choices = NULL,
+  selected = NULL,
+  multiple = FALSE,
+  placeholder = NULL,
+  width = "100%",
+  options = NULL
+) {
+  tag <- selectizeInput(
+    inputId,
+    label,
+    choices = choices,
+    selected = selected,
+    multiple = multiple,
+    placeholder = placeholder,
+    width = width,
+    options = options
+  )
+  # Add class for JS handling if needed
+  tag
+}
+
 
 #' textAreaInput that fires only on blur.
 #' @noRd
@@ -51,6 +77,7 @@ text_area_blur <- function(
 }
 
 
+
 # ── Identifiers ────────────────────────────────────────────────────────
 panel_identifiers <- function(
   ns = ns,
@@ -73,7 +100,7 @@ panel_identifiers <- function(
       text_input_blur(ns("id_igdb"), "IGDB ID", value = identifiers$id_igdb)
     ),
     bslib::layout_columns(
-      col_widths = c(4, 4, 4),
+      col_widths = c(6, 6),
       text_input_blur(
         ns("id_steam"),
         "Steam App ID",
@@ -83,11 +110,6 @@ panel_identifiers <- function(
         ns("id_gog"),
         "GOG ID",
         value = identifiers$gog_id
-      ),
-      text_input_blur(
-        ns("id_itch"),
-        "itch.io slug",
-        value = identifiers$itch_id
       )
     )
   )
@@ -118,13 +140,8 @@ panel_core <- function(
       ns("official_url"),
       "Official URL",
       value = info$official_url
-    ),
-    text_area_blur(
-      ns("description"),
-      "Description",
-      value = info$description,
-      rows = 4
     )
+    # Note: description field removed - not in database schema
   )
 }
 
@@ -318,6 +335,54 @@ panel_originators_ui <- function(
       "Add originator",
       icon = icon("plus"),
       class = "btn-outline-secondary btn-sm mt-2"
+    )
+  )
+}
+
+# ── Load Existing Game ───────────────────────────────────────────────────
+load_existing_panel <- function(ns = ns, games = NULL) {
+  div(
+    class = "mb-4",
+    p(class = "text-muted small mb-2", "Select a game from the database to edit"),
+    selectizeInput(
+      ns("load_existing_select"),
+      "Game",
+      choices = if (is.null(games) || nrow(games) == 0) {
+        c("")  # Always have empty option
+      } else {
+        c("", setNames(as.character(games$gidb_id), sprintf("%s (ID: %s)", games$title, games$gidb_id)))
+      },
+      selected = "",  # Default to empty selection
+      multiple = FALSE,
+      width = "100%",
+      options = list(
+        placeholder = "Search or select a game..."
+      )
+    ),
+    div(
+      style = "margin-top: 1rem;",
+      shinyjs::disabled(actionButton(ns("load_existing_btn"), "Load Game", class = "btn-primary"))
+    ),
+    # Delete button - only visible after a game is loaded
+    uiOutput(ns("delete_game_btn_container"))
+  )
+}
+
+# Helper to render delete button conditionally
+render_delete_button <- function(ns, gidb_id, game_title) {
+  if (is.null(gidb_id)) {
+    return(tagList())
+  }
+  div(
+    class = "mt-3 pt-3 border-top",
+    actionButton(
+      ns("delete_game_btn"),
+      "Delete Game",
+      icon = icon("trash"),
+      class = "btn-outline-danger btn-sm"
+    ),
+    p(class = "text-muted small mt-2",
+      tags$em(sprintf("Deleting game '%s' (ID: %s)", game_title %||% "Untitled", gidb_id))
     )
   )
 }

@@ -12,7 +12,12 @@ app_ui <- function(request) {
     shinyjs::useShinyjs(),
     # Your application UI logic
     bslib::page_fluid(
-      h1("gidb"),
+      # Header with title and user info
+      div(
+        class = "d-flex justify-content-between align-items-center mb-3",
+        h1(class = "mb-0", "gidb"),
+        uiOutput("user_display")
+      ),
       shiny::tabsetPanel(
         id = "tabs",
         type = "tabs",

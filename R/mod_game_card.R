@@ -17,8 +17,8 @@ mod_game_card_ui <- function(id) {
       class = "d-flex align-items-center justify-content-between py-2",
       div(
         class = "d-flex align-items-center gap-2",
-        bsicons::bs_icon("eye"),
-        strong("Preview")
+        bsicons::bs_icon("card-heading"),
+        strong("Game data")
       ),
       div(
         class = "d-flex gap-2",
@@ -50,7 +50,7 @@ mod_game_card_ui <- function(id) {
 #' Pill row.
 #' @noRd
 .pill_row <- function(game_data, pill_class = "preview-pill") {
-  game_data <- game_data[!is.na(game_data) & nchar(game_data) > 0]
+  game_data <- game_data[!is.na(game_data) & nzchar(game_data)]
   if (length(game_data) == 0) {
     return(span(class = "preview-empty", "—"))
   }
@@ -109,6 +109,7 @@ mod_game_card_ui <- function(id) {
 #' @noRd
 mod_game_card_server <- function(id, game_data) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     return_values <- reactiveValues(
       reset_flag = 0,
       saved_flag = 0
@@ -117,10 +118,10 @@ mod_game_card_server <- function(id, game_data) {
     output$preview_content <- renderUI({
       # Title — linked if official_url is set
       title_el <- if (
-        !is.null(game_data$info$title) && nchar(game_data$info$title) > 0
+        !is.null(game_data$info$title) && nzchar(game_data$info$title)
       ) {
         url <- game_data$info$official_url %||% ""
-        if (nchar(url) > 0) {
+        if (nzchar(url)) {
           tags$a(
             class = "preview-title-link",
             href = url,
@@ -140,13 +141,17 @@ mod_game_card_server <- function(id, game_data) {
             class = "small text-muted",
             bsicons::bs_icon("calendar3"),
             " ",
-            game_data$info$release_year %||% "—"
+            if (!is.null(game_data$info$release_year) && !is.na(game_data$info$release_year)) {
+              game_data$info$release_year
+            } else {
+              "—"
+            }
           )
         ),
         # Description
         {
           desc <- game_data$info$description %||% ""
-          if (nchar(desc) > 0) {
+          if (nzchar(desc)) {
             tagList(
               hr(class = "my-2"),
               div(
@@ -189,12 +194,12 @@ mod_game_card_server <- function(id, game_data) {
         # before its pills
         {
           tags <- game_data$game_tags
-          tags <- tags[purrr::map_lgl(tags, \(t) nchar(t$name %||% "") > 0)]
+          tags <- tags[purrr::map_lgl(tags, \(t) nzchar(t$name %||% ""))]
           if (length(tags) > 0) {
             cats <- unique(purrr::map_chr(tags, \(t) t$category %||% ""))
-            cats_with_names <- cats[nchar(cats) > 0]
+            cats_with_names <- cats[nzchar(cats)]
             cats_no_cat <- tags[purrr::map_lgl(tags, \(t) {
-              nchar(t$category %||% "") == 0
+              !nzchar(t$category %||% "")
             })]
             cat_rows <- purrr::map(cats_with_names, function(cat) {
               names_in_cat <- purrr::keep(tags, \(t) {
@@ -208,7 +213,7 @@ mod_game_card_server <- function(id, game_data) {
                   style = "white-space: nowrap; font-size: 0.72rem;",
                   paste0(cat, ":")
                 ),
-                lapply(names_in_cat[nchar(names_in_cat) > 0], function(v) {
+                lapply(names_in_cat[nzchar(names_in_cat)], function(v) {
                   span(class = "preview-pill pill-tag", title = v, v)
                 })
               )
@@ -232,9 +237,7 @@ mod_game_card_server <- function(id, game_data) {
           .pill_row(
             purrr::map_chr(game_data$platforms %||% list(), function(p) {
               yr <- p$year
-              has_year <- !is.null(yr) &&
-                !is.na(yr) &&
-                nchar(as.character(yr)) > 0
+              has_year <- !is.null(yr) && !is.na(yr) && nzchar(as.character(yr))
               if (has_year) {
                 paste0(p$name %||% "", " (", yr, ")")
               } else {
@@ -259,8 +262,30 @@ mod_game_card_server <- function(id, game_data) {
       )
     })
 
+    # Show reset confirmation modal
     observeEvent(input$reset, {
+      showModal(
+        modalDialog(
+          title = "Confirm Reset",
+          p("Are you sure you want to reset? All unsaved changes will be lost."),
+          easyClose = FALSE,
+          footer = tagList(
+            actionButton(ns("reset_cancel"), "Cancel", class = "btn-default"),
+            actionButton(ns("reset_confirm"), "Reset", class = "btn-danger")
+          )
+        )
+      )
+    })
+
+    # Handle reset confirmation
+    observeEvent(input$reset_confirm, {
+      removeModal()
       return_values$reset_flag <- return_values$reset_flag + 1
+    })
+
+    # Handle reset cancellation
+    observeEvent(input$reset_cancel, {
+      removeModal()
     })
 
     observeEvent(input$save, {
