@@ -42,3 +42,31 @@ get_golem_config <- function(
     use_parent = use_parent
   )
 }
+
+#' Get media base path for file uploads
+#'
+#' Returns the configured base path for media files set via run_app().
+#' If not set, returns NULL indicating the app directory should be used.
+#'
+#' @return Character string with base path, or NULL if not configured
+#' @noRd
+get_media_base_path <- function() {
+  val <- golem::get_golem_options(which = "media_base_path")
+  if (!is.null(val) && nzchar(trimws(as.character(val)))) {
+    return(path.expand(as.character(val)))
+  }
+  NULL
+}
+
+#' Construct full media path from relative path
+#'
+#' @param rel_path Relative path within media directory
+#' @return Full absolute path
+#' @noRd
+media_path <- function(rel_path) {
+  base <- get_media_base_path()
+  if (is.null(base)) {
+    base <- app_sys("")
+  }
+  file.path(base, rel_path)
+}

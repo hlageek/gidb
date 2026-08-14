@@ -2,6 +2,8 @@
 #'
 #' @param credentials_path Path to the SQLite database for shinymanager.
 #' @param credentials_pass Passphrase for the SQLite database.
+#' @param media_base_path Base directory for media file uploads. If NULL,
+#'   uses the app directory.
 #' @param onStart A function that will be called before the app is actually run.
 #' @param options Named options that should be passed to the `runApp` call.
 #' @param enableBookmarking Can be one of "url", "server", or "disable".
@@ -19,6 +21,7 @@ run_app <- function(
   dbpassword = NULL,
   credentials_path = NULL,
   credentials_pass = NULL,
+  media_base_path = NULL,
   onStart = NULL,
   options = list(),
   enableBookmarking = NULL,
@@ -29,6 +32,7 @@ run_app <- function(
     golem_opts = list(
       credentials_path = credentials_path,
       credentials_pass = credentials_pass,
+      media_base_path = media_base_path,
       ...
     ),
 
