@@ -18,7 +18,7 @@ app_server <- function(input, output, session, pool) {
 
   # Handle login - just set the username
   observeEvent(res_auth, {
-    req(!is.null(res_auth$user))
+    req(res_auth$user)
     user$name <- res_auth$user
   })
 

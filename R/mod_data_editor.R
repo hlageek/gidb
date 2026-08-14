@@ -280,11 +280,11 @@ mod_data_editor_server <- function(id, pool, user) {
           id = ns("game_accordion"),
           open = TRUE,
           multiple = TRUE,
+          panel_core(ns = ns, info = game_data$info),
           panel_identifiers(
             ns = ns,
             identifiers = game_data$identifiers
           ),
-          panel_core(ns = ns, info = game_data$info),
           panel_tags(ns = ns),
           panel_platforms(ns = ns),
           panel_originators(ns = ns),
@@ -298,11 +298,11 @@ mod_data_editor_server <- function(id, pool, user) {
             id = ns("game_accordion"),
             open = TRUE,
             multiple = TRUE,
+            panel_core(ns = ns, info = game_data$info),
             panel_identifiers(
               ns = ns,
               identifiers = game_data$identifiers
             ),
-            panel_core(ns = ns, info = game_data$info),
             panel_tags(ns = ns),
             panel_platforms(ns = ns),
             panel_originators(ns = ns),
@@ -317,11 +317,11 @@ mod_data_editor_server <- function(id, pool, user) {
           id = ns("game_accordion"),
           open = TRUE,
           multiple = TRUE,
+          panel_core(ns = ns, info = game_data$info),
           panel_identifiers(
             ns = ns,
             identifiers = game_data$identifiers
           ),
-          panel_core(ns = ns, info = game_data$info),
           panel_tags(ns = ns),
           panel_platforms(ns = ns),
           panel_originators(ns = ns),

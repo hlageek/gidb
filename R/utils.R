@@ -8,7 +8,7 @@ strip_html <- function(x) {
 }
 
 sql_null <- function(x) {
-  if (is.null(x) || x == "" || length(x) == 0) {
+  if (is.null(x) || is.na(x) || x == "" || length(x) == 0) {
     DBI::SQL("NULL")
   } else {
     x

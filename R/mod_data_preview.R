@@ -38,7 +38,8 @@ mod_data_preview_ui <- function(id) {
     ),
     # CSS for data badges
     tags$style(
-      HTML("
+      HTML(
+        "
         .data-badge {
           display: inline-block;
           padding: 2px 8px;
@@ -98,7 +99,8 @@ mod_data_preview_ui <- function(id) {
         table.dataTable td {
           vertical-align: middle;
         }
-      ")
+      "
+      )
     )
   )
 }
@@ -114,12 +116,12 @@ mod_data_preview_server <- function(id, pool) {
     ns <- session$ns
 
     # Reactive values
-    rv <- reactiveValues(click_count = 0, game_ids = NULL, refresh_trigger = 0)
+    loc <- reactiveValues(click_count = 0, refresh_trigger = 0)
 
     # Fetch game data - invalidate when refresh is clicked
     fetch_games <- reactive({
       req(pool)
-      rv$refresh_trigger  # Dependency for refresh button
+      loc$refresh_trigger # Dependency for refresh button
 
       # Get core game data
       games_df <- db_read_games(pool)
@@ -128,9 +130,8 @@ mod_data_preview_server <- function(id, pool) {
         return(data.frame(
           Edit = character(0),
           Title = character(0),
-          `Release Year` = character(0),
+          Year = character(0),
           Tags = character(0),
-          Platforms = character(0),
           Originators = character(0),
           Identifiers = character(0),
           stringsAsFactors = FALSE
@@ -142,12 +143,18 @@ mod_data_preview_server <- function(id, pool) {
         game <- games_df[i, ]
         gidb_id <- game$gidb_id
 
-        # Edit link - wrapped in a div that triggers row selection
-        edit_html <- sprintf(
-          '<div class="edit-cell" data-game-id="%s"><a class="edit-link">%s</a></div>',
-          gidb_id,
-          "✏️ Edit"
+        # Edit link - ActionLink with onclick to set games_table_cell_click with gidb_id
+        edit_link <- actionLink(
+          inputId = ns(paste0("edit_", gidb_id)),
+          label = "✏️ Edit",
+          class = "edit-link",
+          onclick = sprintf(
+            "Shiny.setInputValue('%s', '%s', {priority: 'event'});",
+            ns("games_table_cell_click"),
+            gidb_id
+          )
         )
+        edit_html <- tags$div(edit_link, class = "edit-cell")
 
         # Title with year
         title_val <- game$title %||% ""
@@ -201,7 +208,9 @@ mod_data_preview_server <- function(id, pool) {
         identifiers <- db_read_game_identifiers(pool, gidb_id)
         ident_parts <- c()
         add_ident <- function(val, prefix) {
-          if (!is.null(val) && !is.na(val) && nzchar(trimws(as.character(val)))) {
+          if (
+            !is.null(val) && !is.na(val) && nzchar(trimws(as.character(val)))
+          ) {
             paste0(prefix, ": ", val)
           }
         }
@@ -227,102 +236,91 @@ mod_data_preview_server <- function(id, pool) {
           Platforms = platforms_html,
           Originators = originators_html,
           Identifiers = identifiers_html,
-          .gidb_id = gidb_id  # Store for click handler
+          .gidb_id = gidb_id # Store for click handler
         )
       })
 
-      result_df <- do.call(rbind, lapply(result_list, function(row) {
-        df <- data.frame(
-          Edit = shiny::HTML(row$Edit),
-          Title = shiny::HTML(row$Title),
-          `Release Year` = shiny::HTML(row$`Release Year`),
-          Tags = shiny::HTML(row$Tags),
-          Platforms = shiny::HTML(row$Platforms),
-          Originators = shiny::HTML(row$Originators),
-          Identifiers = shiny::HTML(row$Identifiers),
-          stringsAsFactors = FALSE
-        )
-        rownames(df) <- NULL  # Explicitly remove row names
-        df
-      }))
-
-      # Store game IDs separately for click handling
-      rv$game_ids <- sapply(result_list, function(row) row$.gidb_id)
+      result_df <- do.call(
+        rbind,
+        lapply(result_list, function(row) {
+          df <- data.frame(
+            Edit = as.character(row$Edit),
+            Title = shiny::HTML(row$Title),
+            `Release Year` = shiny::HTML(row$`Release Year`),
+            Tags = shiny::HTML(row$Tags),
+            Platforms = shiny::HTML(row$Platforms),
+            Originators = shiny::HTML(row$Originators),
+            Identifiers = shiny::HTML(row$Identifiers),
+            stringsAsFactors = FALSE
+          )
+          rownames(df) <- NULL # Explicitly remove row names
+          df
+        })
+      )
 
       result_df
     })
 
     # Render the datatable
-    output$games_table <- DT::renderDataTable(
+    output$games_table <- DT::renderDT(
       expr = fetch_games(),
+      rownames = FALSE, # Don't show row numbers on left
+      selection = "none", # Disable row selection
       options = list(
         pageLength = 10,
         lengthMenu = c(5, 10, 25, 50, 100),
-        order = list(list(1, 'desc')),  # Sort by Title descending
-        select = FALSE,  # Disable row selection, we use clicking instead
+        order = list(list(1, 'desc')), # Sort by Title descending
         paging = TRUE,
         searching = TRUE,
         info = TRUE,
         autoWidth = FALSE,
-        rownames = FALSE,  # Don't show row numbers on left
-        colnames = TRUE,   # Show column names
+        colnames = TRUE, # Show column names
         deferRender = TRUE,
         scrollY = "400px", # Enable vertical scrolling with fixed header
         lengthChange = TRUE,
         columnDefs = list(
           list(className = 'dt-left', targets = '_all'),
-          list(width = '60px', targets = 0),  # Edit column
-          list(width = '150px', targets = 1),  # Title
-          list(width = '100px', targets = 2),  # Release Year
-          list(orderable = FALSE, targets = 0)  # Edit column not sortable
+          list(width = '60px', targets = 0), # Edit column
+          list(width = '150px', targets = 1), # Title
+          list(width = '100px', targets = 2), # Release Year
+          list(orderable = FALSE, targets = 0) # Edit column not sortable
         )
       ),
       server = TRUE,
-      escape = FALSE  # Allow HTML in cells
+      escape = FALSE # Allow HTML in cells
     )
 
-    # Handle clicking on any cell in a row
+    # Handle clicking on the edit link - games_table_cell_click now contains gidb_id directly
     observeEvent(input$games_table_cell_click, {
       req(input$games_table_cell_click)
-      clicked_cell <- input$games_table_cell_click
-
-      # Extract row index from the cell index (DT uses 0-based indexing)
-      # cell index = row * ncol + col
-      n_cols <- 7  # Edit, Title, Release Year, Tags, Platforms, Originators, Identifiers
-      row_idx <- floor(clicked_cell / n_cols) + 1  # Convert to 1-based for R
-
-      # Find the gidb_id for this row
-      req(rv$game_ids)
-      gidb_id <- rv$game_ids[row_idx]
+      gidb_id <- input$games_table_cell_click
       req(gidb_id)
 
       # Update click count to trigger the edit flow
-      rv$click_count <- rv$click_count + 1
+      loc$click_count <- loc$click_count + 1
     })
 
     # Expose the edit_game_id as an observable value
     edit_game_id <- reactive({
       req(input$games_table_cell_click)
-      req(rv$game_ids)
-      clicked_cell <- input$games_table_cell_click
-      n_cols <- 7  # Edit, Title, Release Year, Tags, Platforms, Originators, Identifiers
-      row_idx <- floor(clicked_cell / n_cols) + 1  # Convert to 1-based for R
-      rv$game_ids[row_idx]
+      input$games_table_cell_click
     })
 
     # Refresh button
     observeEvent(input$refresh, {
-      rv$refresh_trigger <- rv$refresh_trigger + 1
+      loc$refresh_trigger <- loc$refresh_trigger + 1
     })
 
     # Expose a refresh function for external triggers (e.g., after save/delete)
     refresh_table <- function() {
-      rv$refresh_trigger <- rv$refresh_trigger + 1
+      loc$refresh_trigger <- loc$refresh_trigger + 1
     }
 
     # Return reactive values and functions
     returnValues <- reactiveValues(
-      click_count = reactive({ rv$click_count }),
+      click_count = reactive({
+        loc$click_count
+      }),
       edit_game_id = edit_game_id,
       refresh_table = refresh_table
     )
