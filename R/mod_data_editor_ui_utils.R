@@ -154,9 +154,20 @@ panel_tags <- function(ns = ns) {
   )
 }
 
-panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL, token) {
+panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL, token, cat_to_tags = NULL) {
   tagList(
     !!!purrr::imap(game_tags, function(game_tag, i) {
+      # Get tags for this row's category (if any) for pre-filtering display
+      cat_value <- game_tag$category %||% ""
+      if (nzchar(cat_value) && !is.null(cat_to_tags)) {
+        cat_tags <- cat_to_tags[[cat_value]] %||% character(0)
+        # Show category-specific tags first, then all others
+        other_tags <- setdiff(game_tags_opts$name, cat_tags)
+        tag_choices <- c("", cat_tags[cat_tags != ""], other_tags[other_tags != ""])
+      } else {
+        tag_choices <- c("", union(game_tags_opts$name, game_tag$name))
+      }
+
       bslib::layout_columns(
         col_widths = c(5, 6, 1),
         selectizeInput(
@@ -171,7 +182,7 @@ panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL, token) {
         selectizeInput(
           ns(paste0("tag_name_", token, "_", i)),
           label = if (i == 1) "Tag name" else NULL,
-          choices = c("", union(game_tags_opts$name, game_tag$name)),
+          choices = tag_choices,
           selected = game_tag$name %||% "",
           multiple = FALSE,
           width = "100%",
@@ -196,68 +207,6 @@ panel_tags_ui <- function(ns, game_tags = NULL, game_tags_opts = NULL, token) {
     actionButton(
       ns("add_tag"),
       "Add tag",
-      icon = icon("plus"),
-      class = "btn-outline-secondary btn-sm mt-2"
-    )
-  )
-}
-# # ── Platforms ──────────────────────────────────────────────────────────
-panel_platforms <- function(ns = ns) {
-  bslib::accordion_panel(
-    title = tagList(bsicons::bs_icon("display"), " Platforms"),
-    value = "platforms",
-    uiOutput(ns("panel_platforms_ui"))
-  )
-}
-
-panel_platforms_ui <- function(
-  ns,
-  platforms = NULL,
-  platforms_opts = NULL,
-  token
-) {
-  tagList(
-    !!!purrr::imap(platforms, function(platform, i) {
-      bslib::layout_columns(
-        col_widths = c(5, 6, 1),
-        selectizeInput(
-          ns(paste0("platform_", token, "_", i)),
-          label = if (i == 1) "Platform" else NULL,
-          choices = c("", union(platforms_opts, platform$name)),
-          selected = platform$name %||% "",
-          multiple = FALSE,
-          width = "100%",
-          options = list(create = TRUE, placeholder = "Select or type…")
-        ),
-        numericInput(
-          ns(paste0("platform_year_", token, "_", i)),
-          label = if (i == 1) "Release year" else NULL,
-          value = as.numeric(platform$year %||% NA),
-          min = 1950,
-          max = as.numeric(format(Sys.Date(), "%Y")) + 5,
-          step = 1,
-          width = "100%",
-          updateOn = "blur"
-        ),
-        div(
-          style = if (i == 1) "padding-top: 1.85rem;" else "",
-          actionButton(
-            ns(paste0("rm_platform_", token, "_", i)),
-            NULL,
-            icon = icon("minus"),
-            class = "btn-outline-danger btn-sm",
-            onclick = sprintf(
-              "Shiny.setInputValue('%s', %d, {priority: 'event'})",
-              ns("rm_platform_clicked"),
-              i
-            )
-          )
-        )
-      )
-    }),
-    actionButton(
-      ns("add_platform"),
-      "Add platform",
       icon = icon("plus"),
       class = "btn-outline-secondary btn-sm mt-2"
     )

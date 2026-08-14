@@ -16,7 +16,6 @@ default_game_data <- function() {
       # itch_id not in schema yet
     ),
     game_tags = list(),
-    # platforms table doesn't exist yet
     originators = list(),
     notes = character(0),
     mobygames_called = FALSE
@@ -90,8 +89,6 @@ load_game_data <- function(pool, gidb_id) {
   }, error = function(e) {
     list()
   })
-
-  # Platforms table doesn't exist in schema yet - skip
 
   # Originators
   result$originators <- tryCatch({

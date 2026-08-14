@@ -54,12 +54,7 @@ mod_data_preview_ui <- function(id) {
           color: #1976d2;
           border: 1px solid #bbdefb;
         }
-        .data-badge-platform {
-          background-color: #e8f5e9;
-          color: #388e3c;
-          border: 1px solid #c8e6c9;
-        }
-        .data-badge-originator {
+        .data-badge-tag {
           background-color: #fff3e0;
           color: #f57c00;
           border: 1px solid #ffe0b2;
@@ -185,9 +180,6 @@ mod_data_preview_server <- function(id, pool) {
           "<span class=\"data-empty\">—</span>"
         }
 
-        # Platforms - table doesn't exist in schema yet
-        platforms_html <- "<span class=\"data-empty\">—</span>"
-
         # Originators (name + role)
         originators_df <- db_read_game_originators(pool, gidb_id)
         originators_html <- if (nrow(originators_df) > 0) {
@@ -233,7 +225,6 @@ mod_data_preview_server <- function(id, pool) {
           Title = title_html,
           `Release Year` = release_year,
           Tags = tags_html,
-          Platforms = platforms_html,
           Originators = originators_html,
           Identifiers = identifiers_html,
           .gidb_id = gidb_id # Store for click handler
@@ -248,7 +239,6 @@ mod_data_preview_server <- function(id, pool) {
             Title = shiny::HTML(row$Title),
             `Release Year` = shiny::HTML(row$`Release Year`),
             Tags = shiny::HTML(row$Tags),
-            Platforms = shiny::HTML(row$Platforms),
             Originators = shiny::HTML(row$Originators),
             Identifiers = shiny::HTML(row$Identifiers),
             stringsAsFactors = FALSE

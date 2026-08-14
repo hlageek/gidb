@@ -173,7 +173,7 @@ db_read_game_tags <- function(pool, gidb_id) {
        FROM tags_games_map tgm
        JOIN tags t ON tgm.tag_id = t.tag_id
        LEFT JOIN categories c ON t.category_id = c.category_id
-       WHERE tgm.game_id = {gidb_id}
+       WHERE tgm.gidb_id = {gidb_id}
        ORDER BY c.category_value, t.tag_value",
       .con = pool
     )
@@ -201,7 +201,7 @@ db_read_game_originators <- function(pool, gidb_id) {
        FROM originators_games_map ogm
        JOIN originators o ON ogm.originator_id = o.originator_id
        JOIN originator_roles r ON ogm.originator_role = r.originator_role_id
-       WHERE ogm.game_id = {gidb_id}
+       WHERE ogm.gidb_id = {gidb_id}
        ORDER BY o.originator_name",
       .con = pool
     )
@@ -313,32 +313,12 @@ db_read_all_roles <- function(pool) {
   })
 }
 
-#' Read all platforms from the database (if table exists)
-#'
-#' @param pool Database pool connection.
-#' @return A character vector of platform names.
-#' @noRd
-db_read_all_platforms <- function(pool) {
-  tryCatch({
-    # Check if platforms table exists first
-    tables <- DBI::dbListTables(pool)
-    if (!"platforms" %in% tables) {
-      return(character(0))
-    }
-    query <- "SELECT DISTINCT platform_name FROM platforms ORDER BY platform_name"
-    result <- DBI::dbGetQuery(pool, query)
-    result$platform_name
-  }, error = function(e) {
-    character(0)
-  })
-}
-
 # ── Formatting helpers ──────────────────────────────────────────────────────
 
 #' Format multiple values as HTML badges/tags
 #'
 #' @param values A character vector of values to format.
-#' @param type The type of badge for CSS styling ("tag", "platform", "originator", "identifier").
+#' @param type The type of badge for CSS styling ("tag", "originator", "identifier").
 #' @param tooltip_values Optional vector of tooltip text (defaults to values).
 #' @return A character string of HTML (wrap with shiny::HTML() when rendering).
 #' @noRd

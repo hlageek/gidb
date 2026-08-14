@@ -103,7 +103,7 @@ mod_game_card_ui <- function(id) {
 #' @param id Module id.
 #' @param game_data A `reactivegame_data` object (e.g. the parent module's `loc`)
 #'   with fields: title, release_year, description, official_url,
-#'   identifiers, tags, platforms, originators, notes. Passed by reference,
+#'   identifiers, tags, originators, notes. Passed by reference,
 #'   so changes made by the caller are reflected reactively here.
 #'
 #' @noRd
@@ -231,22 +231,6 @@ mod_game_card_server <- function(id, game_data) {
             .preview_section("Tags", span(class = "preview-empty", "—"))
           }
         },
-        # Platforms
-        .preview_section(
-          "Platforms",
-          .pill_row(
-            purrr::map_chr(game_data$platforms %||% list(), function(p) {
-              yr <- p$year
-              has_year <- !is.null(yr) && !is.na(yr) && nzchar(as.character(yr))
-              if (has_year) {
-                paste0(p$name %||% "", " (", yr, ")")
-              } else {
-                p$name %||% ""
-              }
-            }),
-            "pill-platform"
-          )
-        ),
         # Originators
         .preview_section(
           "Originators",

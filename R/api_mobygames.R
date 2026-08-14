@@ -13,8 +13,8 @@
 #
 # v2 field names (differ from v1):
 #   genres[]:   category, category_id, id, name
-#   platforms[]: name, platform_id, release_date
-#   developers[]/publishers[]: id, name, url, platforms (list of name strings)
+#   platforms[]: name, platform_id, release_date (used for release year)
+#   developers[]/publishers[]: id, name, url
 #
 # Hobbyist tier available include fields:
 #   covers, description, developers, game_id, genres, moby_score, moby_url,
@@ -109,24 +109,28 @@
 
 
 # ------------------------------------------------------------
-# Internal: parse platforms list
+# Internal: extract earliest release year from platforms list
 #
 # v2 platform fields: name, platform_id, release_date ("YYYY-MM-DD")
 #
-# Returns a list of list(platform_id, platform_name, release_year)
+# Returns the earliest year found (character) or NA
 # ------------------------------------------------------------
 
-.parse_platforms <- function(platforms_list) {
-  purrr::map(platforms_list, function(p) {
+.get_earliest_release_year <- function(platforms_list) {
+  years <- purrr::map_chr(platforms_list %||% list(), function(p) {
     raw_date <- p$release_date %||% NA_character_
-    year <- if (!is.na(raw_date)) substr(raw_date, 1, 4) else NA_character_
-
-    list(
-      platform_id = p$platform_id,
-      platform_name = p$name,
-      release_year = year
-    )
+    if (!is.na(raw_date) && nchar(raw_date) >= 4) {
+      substr(raw_date, 1, 4)
+    } else {
+      NA_character_
+    }
   })
+  valid_years <- years[!is.na(years) & nchar(years) > 0]
+  if (length(valid_years) > 0) {
+    min(valid_years)
+  } else {
+    NA_character_
+  }
 }
 
 
@@ -134,9 +138,9 @@
 # Internal: parse developers and publishers into a unified
 # originators list with a `role` field.
 #
-# v2 company fields: id, name, url, platforms (list of name strings)
+# v2 company fields: id, name, url
 #
-# Returns a list of list(company_id, company_name, role, moby_url, platforms)
+# Returns a list of list(company_id, company_name, role, moby_url)
 # ------------------------------------------------------------
 
 .parse_originators <- function(developers, publishers) {
@@ -145,8 +149,7 @@
       company_id = company$id,
       company_name = company$name,
       role = role,
-      moby_url = company$url,
-      platforms = unlist(company$platforms %||% list())
+      moby_url = company$url
     )
   }
 
@@ -161,7 +164,7 @@
 # moby_get_game_metadata()
 #
 # Fetches a complete metadata record for one game using two API calls:
-#   call 1 — core fields: description, genres, platforms, moby_score
+#   call 1 — core fields: description, genres, platforms (for release year), moby_score
 #   call 2 — originators: developers, publishers
 #
 # @param game_id             Integer or character MobyGames game ID
@@ -174,15 +177,14 @@
 #   $moby_url     character
 #   $official_url character (may be NULL)
 #   $release_date character YYYY-MM-DD of earliest release (may be NULL)
+#   $release_year character YYYY of earliest release year (may be NA)
 #   $description  character (HTML, may be NULL)
 #   $moby_score   numeric   (may be NULL)
 #   $tags         list of buckets, each a list of list(id, name);
 #                   bucket names are snake_case of MobyGames category,
 #                   e.g. basic_genres, perspective, gameplay, setting ...
-#   $platforms    list of list(platform_id, platform_name, release_year)
-#   $originators  list of list(company_id, company_name, role, moby_url, platforms)
+#   $originators  list of list(company_id, company_name, role, moby_url)
 #                   role is "developer" or "publisher"
-#                   platforms is a character vector of platform names
 #   NOTE: identifiers (Steam ID, wiki etc.) require Silver API tier.
 # ============================================================
 
@@ -204,7 +206,7 @@ moby_get_game_metadata <- function(game_id, include_originators = TRUE) {
   game <- core_result$games[[1]]
 
   tags <- .parse_tags(game$genres %||% list())
-  platforms <- .parse_platforms(game$platforms %||% list())
+  release_year <- .get_earliest_release_year(game$platforms %||% list())
 
   # --- Call 2: originators ---
   originators <- list()
@@ -232,10 +234,10 @@ moby_get_game_metadata <- function(game_id, include_originators = TRUE) {
     moby_url = game$moby_url,
     official_url = game$official_url,
     release_date = game$release_date,
+    release_year = release_year,
     description = game$description,
     moby_score = game$moby_score,
     tags = tags,
-    platforms = platforms,
     originators = originators
   )
 }
@@ -252,8 +254,9 @@ moby_print_metadata <- function(meta) {
   cat("Title: ", meta$moby_title, "\n")
   cat("URL:   ", meta$moby_url, "\n")
   cat("Score: ", meta$moby_score %||% "N/A", "\n")
-  cat("Release:", meta$release_date %||% "N/A", "\n")
-  cat("URL:   ", meta$official_url %||% "N/A", "\n\n")
+  cat("Release Date:", meta$release_date %||% "N/A", "\n")
+  cat("Release Year:", meta$release_year %||% "N/A", "\n")
+  cat("Official URL:", meta$official_url %||% "N/A", "\n\n")
 
   cat("--- Tags ---\n")
   for (bucket in names(meta$tags)) {
@@ -265,32 +268,16 @@ moby_print_metadata <- function(meta) {
     cat(sprintf("  %-14s %s\n", paste0(bucket, ":"), labels))
   }
 
-  cat("\n--- Platforms ---\n")
-  for (p in meta$platforms) {
-    cat(sprintf(
-      "  [%d] %-30s %s\n",
-      p$platform_id,
-      p$platform_name,
-      p$release_year %||% "?"
-    ))
-  }
-
   cat("\n--- Originators ---\n")
   if (length(meta$originators) == 0) {
     cat("  (not fetched or none found)\n")
   } else {
     for (o in meta$originators) {
-      plat_str <- if (length(o$platforms) > 0) {
-        paste0(" [", paste(o$platforms, collapse = ", "), "]")
-      } else {
-        ""
-      }
       cat(sprintf(
-        "  [%d] %-35s (%s)%s\n",
+        "  [%d] %-35s (%s)\n",
         o$company_id,
         o$company_name,
-        o$role,
-        plat_str
+        o$role
       ))
     }
   }
