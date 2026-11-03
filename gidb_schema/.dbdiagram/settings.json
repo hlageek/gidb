@@ -1,0 +1,14 @@
+{
+  "dbml": {
+    "entry": "/Users/radimhladik/repos/gidb/gidb_schema/gidb.dbml"
+  },
+  "diagram": {
+    "id": "6929c4add6676488bad1d713",
+    "workspaceId": ""
+  },
+  "document": {
+    "source": "file",
+    "workspaceUrlName": "hlageek",
+    "projectUrlName": "gidb"
+  }
+}

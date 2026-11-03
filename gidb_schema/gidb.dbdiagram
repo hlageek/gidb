@@ -1,0 +1,1268 @@
+{
+  "version": "3.0.0",
+  "darkMode": false,
+  "gridEnabling": false,
+  "currentViewName": null,
+  "defaultView": {
+    "detailLevel": "All",
+    "relationshipMode": "All",
+    "tablePositions": [
+      {
+        "name": "editors",
+        "schemaName": "public",
+        "x": 450.4110887976722,
+        "y": 674.5970111743336
+      },
+      {
+        "name": "games",
+        "schemaName": "public",
+        "x": -74.24022079407138,
+        "y": 1201.2903841069829
+      },
+      {
+        "name": "collections",
+        "schemaName": "public",
+        "x": 648.9457709588354,
+        "y": 1145.0565576998954
+      },
+      {
+        "name": "games_collections_map",
+        "schemaName": "public",
+        "x": 661.7618360040887,
+        "y": 926.2835614588347
+      },
+      {
+        "name": "categories",
+        "schemaName": "public",
+        "x": 97.76013639940763,
+        "y": 274.81514321756543
+      },
+      {
+        "name": "tags",
+        "schemaName": "public",
+        "x": 121.96824236673598,
+        "y": -42.835445354986945
+      },
+      {
+        "name": "tags_games_map",
+        "schemaName": "public",
+        "x": 412.8034660199732,
+        "y": 103.789212629394
+      },
+      {
+        "name": "originator_roles",
+        "schemaName": "public",
+        "x": 732.1535945186364,
+        "y": -152.67054685202618
+      },
+      {
+        "name": "originators",
+        "schemaName": "public",
+        "x": 1087.8401521086198,
+        "y": 189.7202661900849
+      },
+      {
+        "name": "originators_games_map",
+        "schemaName": "public",
+        "x": 726.0702624568688,
+        "y": 74.76993597609477
+      },
+      {
+        "name": "originators_locations_map",
+        "schemaName": "public",
+        "x": 1413.2470200810253,
+        "y": 709.4459508240768
+      },
+      {
+        "name": "notes",
+        "schemaName": "public",
+        "x": -154.86714629193696,
+        "y": 543.2563819678418
+      },
+      {
+        "name": "countries",
+        "schemaName": "public",
+        "x": 1522.6160426783167,
+        "y": 1414.5282036004642
+      },
+      {
+        "name": "locations",
+        "schemaName": "public",
+        "x": 1015.913557704436,
+        "y": 1552.4687251534099
+      },
+      {
+        "name": "media",
+        "schemaName": "public",
+        "x": -1214.1683581472653,
+        "y": 988.1606056954747
+      },
+      {
+        "name": "eras",
+        "schemaName": "public",
+        "x": 1529.9569605221739,
+        "y": 2262.6346301548137
+      },
+      {
+        "name": "signs",
+        "schemaName": "public",
+        "x": 285.15461405447616,
+        "y": 1920.8203878198094
+      },
+      {
+        "name": "captures",
+        "schemaName": "public",
+        "x": 845.6123520861465,
+        "y": 1843.5885012363024
+      },
+      {
+        "name": "references",
+        "schemaName": "public",
+        "x": 838.1728989611464,
+        "y": 2122.708465014679
+      },
+      {
+        "name": "periods",
+        "schemaName": "public",
+        "x": -1214.1683581472653,
+        "y": 2364.708465014679
+      },
+      {
+        "name": "provenances",
+        "schemaName": "public",
+        "x": -1214.1683581472653,
+        "y": 2606.708465014679
+      },
+      {
+        "name": "sources",
+        "schemaName": "public",
+        "x": -1214.1683581472653,
+        "y": 2606.708465014679
+      },
+      {
+        "name": "attachments",
+        "schemaName": "public",
+        "x": -1214.1683581472653,
+        "y": 2816.708465014679
+      },
+      {
+        "name": "games_tags_map",
+        "schemaName": "public",
+        "x": -1214.1683581472653,
+        "y": 3410.708465014679
+      },
+      {
+        "name": "games_originators_map",
+        "schemaName": "public",
+        "x": -982.9681628347653,
+        "y": 3410.708465014679
+      },
+      {
+        "name": "representations",
+        "schemaName": "public",
+        "x": -709.4354479910153,
+        "y": 3410.708465014679
+      }
+    ],
+    "tableGroupCollapseStates": [],
+    "stickyNoteLayouts": [],
+    "referencePaths": [
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "games",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "games",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "collection_id"
+        ],
+        "firstTableName": "games_collections_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "collection_id"
+        ],
+        "secondTableName": "collections",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "category_id"
+        ],
+        "firstTableName": "tags",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "category_id"
+        ],
+        "secondTableName": "categories",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "tag_id"
+        ],
+        "firstTableName": "tags_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "tag_id"
+        ],
+        "secondTableName": "tags",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "originator_id"
+        ],
+        "firstTableName": "originators_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "originator_id"
+        ],
+        "secondTableName": "originators",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "originator_role"
+        ],
+        "firstTableName": "originators_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "originator_role_id"
+        ],
+        "secondTableName": "originator_roles",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "originator_id"
+        ],
+        "firstTableName": "originators_locations_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "originator_id"
+        ],
+        "secondTableName": "originators",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "originators_locations_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "location_id"
+        ],
+        "secondTableName": "locations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "country_id"
+        ],
+        "firstTableName": "locations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "country_id"
+        ],
+        "secondTableName": "countries",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "game_parent_id"
+        ],
+        "firstTableName": "games",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "games_collections_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "tags_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "originators_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "notes_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "note_id"
+        ],
+        "firstTableName": "notes_games_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "note_id"
+        ],
+        "secondTableName": "notes",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "sources",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "location_id"
+        ],
+        "secondTableName": "locations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "sources",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "signs",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "signs_media_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "media_id"
+        ],
+        "firstTableName": "signs_media_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "media_id"
+        ],
+        "secondTableName": "media",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "captures",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "captures",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "captures",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "captures",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "captures",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "location_id"
+        ],
+        "secondTableName": "locations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "references",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "references",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "location_id"
+        ],
+        "secondTableName": "locations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "collections",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "collections",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "capture_id"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "capture_id"
+        ],
+        "secondTableName": "captures",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "reference_id"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "reference_id"
+        ],
+        "secondTableName": "references",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "era_id"
+        ],
+        "firstTableName": "references",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "era_id"
+        ],
+        "secondTableName": "eras",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "period_id"
+        ],
+        "firstTableName": "references",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "period_id"
+        ],
+        "secondTableName": "periods",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "provenance_id"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "provenance_id"
+        ],
+        "secondTableName": "provenances",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "provenances",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "provenances",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "location_id"
+        ],
+        "secondTableName": "locations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "source_id"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "source_id"
+        ],
+        "secondTableName": "sources",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "sources",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "source_id"
+        ],
+        "firstTableName": "media",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "source_id"
+        ],
+        "secondTableName": "sources",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "attachments",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "attachments",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "attachments",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "attachments",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "source_id"
+        ],
+        "firstTableName": "attachments",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "source_id"
+        ],
+        "secondTableName": "sources",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "games_tags_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "tag_id"
+        ],
+        "firstTableName": "games_tags_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "tag_id"
+        ],
+        "secondTableName": "tags",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "originators",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "originators",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "originator_id"
+        ],
+        "firstTableName": "games_originators_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "originator_id"
+        ],
+        "secondTableName": "originators",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "gidb_id"
+        ],
+        "firstTableName": "games_originators_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "gidb_id"
+        ],
+        "secondTableName": "games",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "originator_role"
+        ],
+        "firstTableName": "games_originators_map",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "originator_role_id"
+        ],
+        "secondTableName": "originator_roles",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "representation_id"
+        ],
+        "firstTableName": "notes",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "representation_id"
+        ],
+        "secondTableName": "representations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "locations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "locations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "signs",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "signs",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "sources",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "sources",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "created_by"
+        ],
+        "firstTableName": "representations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "modified_by"
+        ],
+        "firstTableName": "representations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "editor_id"
+        ],
+        "secondTableName": "editors",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "sign_id"
+        ],
+        "firstTableName": "representations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "sign_id"
+        ],
+        "secondTableName": "signs",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "location_id"
+        ],
+        "firstTableName": "representations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "location_id"
+        ],
+        "secondTableName": "locations",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      },
+      {
+        "firstFieldNames": [
+          "period_id"
+        ],
+        "firstTableName": "representations",
+        "firstSchemaName": "public",
+        "firstRelation": "*",
+        "secondFieldNames": [
+          "period_id"
+        ],
+        "secondTableName": "periods",
+        "secondSchemaName": "public",
+        "secondRelation": "1",
+        "checkPoints": []
+      }
+    ]
+  },
+  "views": {}
+}

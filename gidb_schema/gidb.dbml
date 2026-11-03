@@ -1,0 +1,265 @@
+Table editors {
+  editor_id integer [pk, increment]
+  editor_login varchar [unique, not null]
+  editor_name_last varchar
+  editor_name_first varchar
+  permissions integer
+  // internal metadata
+  created_at timestamp [default: `now()`] 
+}
+
+Table games {
+  gidb_id integer [pk, increment]
+  mobygames_id integer [unique]
+  igdb_id integer [unique]
+  steam_id integer [unique]
+  gog_id integer [unique]
+  itch_id varchar [unique]
+  wikidata_id varchar [unique]
+  game_title text [not null]
+  game_parent_id integer
+  game_year integer // release year e.g. 1995
+  game_url varchar
+  gidb_status varchar // e.g. published
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`] 
+  checks {
+    `game_parent_id <> gidb_id`
+  }
+}
+
+Ref: games.game_parent_id > games.gidb_id [delete: set null]
+Ref: games.created_by > editors.editor_id [delete: set null]
+Ref: games.modified_by > editors.editor_id [delete: set null]
+
+Table collections {
+  collection_id integer [pk, increment]
+  collection_name varchar [unique, not null]
+  collection_description text
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`]
+  modified_at timestamp [default: `now()`]
+}
+Ref: collections.created_by > editors.editor_id [delete: set null]
+Ref: collections.modified_by > editors.editor_id [delete: set null]
+
+
+Table games_collections_map {
+  gidb_id integer [pk]
+  collection_id integer [pk]
+}
+
+Ref: games_collections_map.gidb_id > games.gidb_id [delete: cascade]
+Ref: games_collections_map.collection_id > collections.collection_id [delete: cascade]
+
+Table categories {
+  category_id integer [pk, increment]
+  category_name varchar [unique, not null]
+  category_source varchar
+}
+
+Table tags {
+  tag_id integer [pk, increment]
+  tag_name varchar [unique, not null]
+  category_id integer
+}
+
+Ref: tags.category_id > categories.category_id [delete: set null]
+
+Table games_tags_map {
+  gidb_id integer [pk]
+  tag_id integer [pk]
+}
+
+Ref: games_tags_map.gidb_id > games.gidb_id [delete: cascade]
+Ref: games_tags_map.tag_id > tags.tag_id [delete: cascade]
+
+Table originator_roles {
+  originator_role_id integer [pk, increment]
+  originator_role_name varchar [unique, not null]
+}
+
+Table originators {
+  originator_id integer [pk, increment]
+  originator_mobygames_id integer [unique]
+  originator_igdb_id integer [unique]
+  originator_wikidata_id varchar [unique]
+  originator_name varchar [not null]
+  originator_description text
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`]
+}
+Ref: originators.created_by > editors.editor_id [delete: set null]
+Ref: originators.modified_by > editors.editor_id [delete: set null]
+
+Table games_originators_map {
+  originator_id integer [pk]
+  gidb_id integer [pk]
+  originator_role integer [pk]
+}
+
+Ref: games_originators_map.originator_id > originators.originator_id [delete: cascade]
+Ref: games_originators_map.gidb_id > games.gidb_id [delete: cascade]
+Ref: games_originators_map.originator_role > originator_roles.originator_role_id [delete: restrict]
+
+Table originators_locations_map {
+  originator_id integer [pk]
+  location_id integer [pk]
+}
+
+Ref: originators_locations_map.originator_id > originators.originator_id [delete: cascade]
+Ref: originators_locations_map.location_id > locations.location_id [delete: cascade]
+
+Table notes {
+  note_id integer [pk, increment]  // normal autoincrement
+  note text [not null]
+  gidb_id integer
+  source_id integer
+  representation_id integer
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`]
+  modified_at timestamp [default: `now()`]
+  checks {
+    `num_nonnulls(gidb_id, source_id, representation_id) = 1`
+  }
+}
+
+Ref: notes.created_by > editors.editor_id [delete: set null] 
+Ref: notes.modified_by > editors.editor_id [delete: set null]
+Ref: notes.gidb_id > games.gidb_id [delete: cascade]
+Ref: notes.source_id > sources.source_id [delete: cascade]
+Ref: notes.representation_id > representations.representation_id [delete: cascade]
+
+
+Table countries {
+  country_id integer [pk, increment]
+  geonames_id integer [unique]
+  country_code varchar [unique, not null]
+  country_name varchar [unique, not null]
+}
+
+Table locations {
+  location_id integer [pk, increment]
+  geonames_id integer [unique]
+  wikidata_id varchar [unique]
+  is_fictional bool [not null, default: false]
+  latitude decimal
+  longitude decimal
+  location_name varchar [not null]
+  country_id integer
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`]
+  checks {
+    `(latitude IS NULL) = (longitude IS NULL)`
+    `latitude BETWEEN -90 AND 90`
+    `longitude BETWEEN -180 AND 180`
+  }
+}
+
+Ref: locations.country_id > countries.country_id [delete: restrict]
+Ref: locations.created_by > editors.editor_id [delete: set null]
+Ref: locations.modified_by > editors.editor_id [delete: set null]
+
+Table attachments {
+  attachment_id integer [pk, increment]
+  gidb_id integer
+  sign_id integer
+  source_id integer
+  attachment_path varchar [not null]
+  attachment_filename varchar
+  attachment_mime varchar // e.g. image/jpeg, image/png, video/mp4
+  attachment_type varchar // e.g. screenshot, cover, poster, video
+  attachment_provenance varchar // e.g. MobyGames, own source
+  attachment_license varchar // e.g. CC BY 4.0, proprietary, unknown
+  attachment_publishable boolean [not null, default: false]
+  attachment_description text
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`]
+  checks {
+    `num_nonnulls(gidb_id, sign_id, source_id) = 1`
+  }
+}
+
+Ref: attachments.gidb_id > games.gidb_id [delete: cascade]
+Ref: attachments.created_by > editors.editor_id [delete: set null]
+Ref: attachments.modified_by > editors.editor_id [delete: set null]
+Ref: attachments.sign_id > signs.sign_id [delete: cascade]
+Ref: attachments.source_id > sources.source_id [delete: cascade]
+
+Table signs {
+  sign_id integer [pk, increment]
+  gidb_id integer [not null]
+  sign_name varchar [not null]
+  description text
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`]
+}
+Ref: signs.gidb_id > games.gidb_id [delete: cascade]
+Ref: signs.created_by > editors.editor_id [delete: set null]
+Ref: signs.modified_by > editors.editor_id [delete: set null]
+
+
+Table sources {
+  source_id integer [pk, increment]
+  sign_id integer [not null]
+  location_id integer [not null]
+  technology varchar   // needs vocabulary
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`]
+}
+Ref: sources.created_by > editors.editor_id [delete: set null]
+Ref: sources.modified_by > editors.editor_id [delete: set null]
+Ref: sources.sign_id > signs.sign_id [delete: cascade]
+Ref: sources.location_id > locations.location_id [delete: restrict]
+
+
+
+Table representations {
+  representation_id integer [pk, increment] 
+  sign_id integer [not null]
+  location_id integer [not null] 
+  is_direct bool [not null, default: false]  // needs definition
+  period_id integer
+  // internal metadata
+  created_by integer
+  modified_by integer
+  created_at timestamp [default: `now()`] 
+  modified_at timestamp [default: `now()`]
+}
+Ref: representations.created_by > editors.editor_id [delete: set null]
+Ref: representations.modified_by > editors.editor_id [delete: set null]
+Ref: representations.sign_id > signs.sign_id [delete: cascade]
+Ref: representations.location_id > locations.location_id [delete: restrict]
+Ref: representations.period_id > periods.period_id [delete: set null]
+
+
+Table periods {
+  period_id integer [pk, increment]
+  period_name varchar [unique]
+  year_from integer
+  year_to integer
+  wikidata_id varchar [unique]
+  checks {
+   `year_from <= year_to`
+  }
+}
