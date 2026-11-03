@@ -88,28 +88,12 @@ app_server <- function(input, output, session, pool) {
     }
   })
 
-  # Data preview module
-  preview_server <- mod_data_preview_server("data_preview_1", pool = pool)
-
   # Data editor module
   editor_server <- mod_data_editor_server(
     "data_editor_1",
     pool = pool,
     user = user
   )
-
-  # When preview module signals a game should be edited, load it in the editor
-  observeEvent(preview_server$edit_game_id(), {
-    req(preview_server$edit_game_id())
-    editor_server$load_game(preview_server$edit_game_id())
-    updateTabsetPanel(session, inputId = "tabs", selected = "data_editor")
-  })
-
-  # Listen for save events from editor and refresh the table
-  observeEvent(editor_server$saved_game_id(), {
-    req(editor_server$saved_game_id())
-    preview_server$refresh_table()
-  })
 
   # Render user display in top right corner
   output$user_display <- renderUI({

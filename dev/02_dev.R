@@ -23,6 +23,8 @@ attachment::att_amend_desc()
 golem::add_module(name = "data_editor") # Name of the module
 golem::add_module(name = "data_preview") # Name of the module
 golem::add_module(name = "game_card") # Name of the module
+golem::add_module(name = "item") # Name of the module
+golem::add_module(name = "game_item") # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
