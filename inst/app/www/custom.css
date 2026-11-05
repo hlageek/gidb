@@ -1,5 +1,5 @@
  /* ── Layout ── */
-      .editor-layout {
+      .game-editor-layout {
         display: grid;
         grid-template-columns: 360px 1fr;
         gap: 1rem;
@@ -12,7 +12,7 @@
         margin-bottom: 5rem;
         overflow-y: visible;
       }
-      .editor-panel {
+      .game-editor-panel {
         overflow-y: visible;
         padding-right: 0.25rem;
         margin-bottom: 5rem;

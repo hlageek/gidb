@@ -1,4 +1,4 @@
-#' data_editor UI Function
+#' game_editor UI Function
 #'
 #' @description A shiny Module for adding/editing game records. Supports
 #'   manual data entry and semi-automated entry via MobyGames API.
@@ -8,13 +8,12 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_data_editor_ui <- function(id) {
+mod_game_editor_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
     div(
-      class = "editor-layout",
-      id = ns("editor_layout"),
+      class = "game-editor-layout",
       div(
         "Select existing game",
         selectInput(
@@ -36,34 +35,24 @@ mod_data_editor_ui <- function(id) {
       ),
       bslib::accordion(
         id = ns("game_editor"),
-        open = "core",
-        bslib::accordion_panel(
-          class = "editor-panel",
-          icon = bsicons::bs_icon("info-circle"),
-          title = "Core Info",
-          value = "core",
-          mod_game_item_ui(
-            ns("mobygames_id"),
-            type = "integer",
-            label = "MobyGames ID"
-          ),
-          mod_game_item_ui(
-            ns("igdb_id"),
-            type = "integer",
-            label = "IGDB ID"
-          )
-        ),
+        open = "identifiers",
         bslib::accordion_panel(
           icon = bsicons::bs_icon("upc"),
           title = "Identifiers",
-          value = "identifiers"
+          value = "identifiers",
+          uiOutput(ns("panel_identifiers_ui"))
+        ),
+        bslib::accordion_panel(
+          icon = bsicons::bs_icon("info-circle"),
+          title = "Core info",
+          value = "core"
         )
       )
     )
   )
 }
 
-#' data_editor Server Function
+#' game_editor Server Function
 #'
 #' @param id Module ID.
 #' @param pool Database pool connection.
@@ -71,10 +60,28 @@ mod_data_editor_ui <- function(id) {
 #'
 #' @return A reactiveValues with `load_game` function to load a game by ID.
 #' @noRd
-mod_data_editor_server <- function(id, pool, user) {
+mod_game_editor_server <- function(id, pool, user) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     loc <- reactiveValues()
+
+    output$panel_identifiers_ui <- renderUI({
+      if (!isTruthy(input$game)) {
+        return(tagList())
+      }
+      tagList(
+        mod_game_item_ui(
+          id = ns("mobygames_id"),
+          type = "integer",
+          label = "MobyGames ID"
+        ),
+        mod_game_item_ui(
+          id = ns("igdb_id"),
+          type = "integer",
+          label = "IGDB ID"
+        )
+      )
+    })
 
     mod_game_item_server(
       "mobygames_id",
@@ -94,14 +101,14 @@ mod_data_editor_server <- function(id, pool, user) {
       user = user,
       gidb_id = reactive(input$game),
       table = "games",
-      column = "mobygames_id",
+      column = "igdb_id",
       type = "integer"
     )
   })
 }
 
 ## To be copied in the UI:
-# mod_data_editor_ui("data_editor_1")
+# mod_game_editor_ui("game_editor_1")
 
 ## To be copied in the server:
-# mod_data_editor_server("data_editor_1")
+# mod_game_editor_server("game_editor_1")

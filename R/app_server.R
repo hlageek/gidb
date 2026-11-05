@@ -88,9 +88,9 @@ app_server <- function(input, output, session, pool) {
     }
   })
 
-  # Data editor module
-  editor_server <- mod_data_editor_server(
-    "data_editor_1",
+  # Game editor module
+  game_editor_server <- mod_game_editor_server(
+    "game_editor_1",
     pool = pool,
     user = user
   )

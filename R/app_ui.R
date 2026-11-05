@@ -22,9 +22,9 @@ app_ui <- function(request) {
         id = "tabs",
         type = "tabs",
         tabPanel(
-          title = "Data editor",
-          value = "data_editor",
-          mod_data_editor_ui("data_editor_1")
+          title = "Game editor",
+          value = "game_editor",
+          mod_game_editor_ui("game_editor_1")
         )
       )
     )
