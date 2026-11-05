@@ -52,6 +52,18 @@ mod_game_editor_ui <- function(id) {
   )
 }
 
+#' Field definitions for the Identifiers panel
+#'
+#' One entry per field. Used by both loops below -- the server loop (one
+#' mod_game_item_server() per entry) and the UI loop (one mod_game_item_ui()
+#' per entry) -- so module id, label and DB column cannot drift apart.
+#'
+#' @noRd
+game_editor_fields <- list(
+  list(id = "mobygames_id", label = "MobyGames ID", column = "mobygames_id", type = "integer"),
+  list(id = "igdb_id", label = "IGDB ID", column = "igdb_id", type = "integer")
+)
+
 #' game_editor Server Function
 #'
 #' @param id Module ID.
@@ -63,47 +75,45 @@ mod_game_editor_ui <- function(id) {
 mod_game_editor_server <- function(id, pool, user) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    loc <- reactiveValues()
 
-    output$panel_identifiers_ui <- renderUI({
-      if (!isTruthy(input$game)) {
-        return(tagList())
+    # Start each field's server once, here. Server modules return observers,
+    # not UI -- they must never be called from renderUI(). walk() is the
+    # side-effect counterpart of map(); the returned observers are not needed.
+    purrr::walk(
+      game_editor_fields,
+      function(field) {
+        mod_game_item_server(
+          field$id,
+          label = field$label,
+          pool = pool,
+          user = user, # reactiveValues object
+          gidb_id = reactive(input$game),
+          table = "games",
+          column = field$column,
+          type = field$type
+        )
       }
+    )
+
+    # renderUI() only builds UI, for modules that already exist above.
+    # ns is session$ns(), so the ids line up with the module namespaces:
+    # game_editor_1-mobygames_id-value.
+    output$panel_identifiers_ui <- renderUI({
+      req(input$game)
+
       tagList(
-        mod_game_item_ui(
-          id = ns("mobygames_id"),
-          type = "integer",
-          label = "MobyGames ID"
-        ),
-        mod_game_item_ui(
-          id = ns("igdb_id"),
-          type = "integer",
-          label = "IGDB ID"
+        purrr::map(
+          game_editor_fields,
+          function(field) {
+            mod_game_item_ui(
+              id = ns(field$id),
+              type = field$type,
+              label = field$label
+            )
+          }
         )
       )
     })
-
-    mod_game_item_server(
-      "mobygames_id",
-      label = "MobyGames ID",
-      pool = pool,
-      user = user, # reactiveValues object
-      gidb_id = reactive(input$game),
-      table = "games",
-      column = "mobygames_id",
-      type = "integer"
-    )
-
-    mod_game_item_server(
-      "igdb_id",
-      label = "IGDB ID",
-      pool = pool,
-      user = user,
-      gidb_id = reactive(input$game),
-      table = "games",
-      column = "igdb_id",
-      type = "integer"
-    )
   })
 }
 
