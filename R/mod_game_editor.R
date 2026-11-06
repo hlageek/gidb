@@ -55,14 +55,6 @@ mod_game_editor_ui <- function(id) {
   )
 }
 
-#' Field definitions for the Identifiers panel
-#'
-#' One entry per field. Used by both loops below -- the server loop (one
-#' mod_game_item_server() per entry) and the UI loop (one mod_game_item_ui()
-#' per entry) -- so module id, label and DB column cannot drift apart.
-#'
-#' @noRd
-
 #' game_editor Server Function
 #'
 #' @param id Module ID.
@@ -73,42 +65,37 @@ mod_game_editor_ui <- function(id) {
 #' @noRd
 mod_game_editor_server <- function(id, pool, user) {
   moduleServer(id, function(input, output, session) {
+    # The helpers live in mod_game_editor_fct.R but are evaluated in this frame,
+    # so they can use input/session/loc/ns/... without argument plumbing.
+    define_game_editor_helpers(environment())
+
     ns <- session$ns
-    loc <- reactiveValues()
-    loc$observer_game_editor <- 0
-    loc$selected_game <- NULL
+    loc <- reactiveValues(observer_game_editor = 0)
 
     # Fill the selector on launch with nothing selected; later runs only refresh
-    # its labels. loc$selected_game carries the current selection through a
-    # refresh; with none to carry, the blank entry is selected instead, which
-    # hides the editor UI (its outputs req() on input$game) until another game
-    # is picked.
+    # its labels. The handler is isolated, so input$game is read as it stands
+    # and the current selection survives the refresh; with no selection at all
+    # the blank entry is used, which hides the editor UI (its outputs req() on
+    # input$game) until another game is picked.
     observeEvent(loc$observer_game_editor, {
       updateSelectInput(
         session = session,
         inputId = "game",
         choices = c("", db_list_games(pool)),
-        selected = loc$selected_game %||% ""
+        selected = input$game %||% ""
       )
-      loc$selected_game <- NULL
     })
 
     # Title UI -----
     output$game_title <- renderUI({
       req(input$game)
-      # Read as a trigger: db_list_games() is not reactive, so without this the
-      # title would keep its old text after a rename.
+      # Read as a trigger: the stored title is not reactive, so without this it
+      # would keep its old text after a rename.
       loc$observer_game_editor
 
-      games <- db_list_games(pool)
-      title <- trimws(gsub(
-        "(.*)\\(GIDB:.*\\)",
-        "\\1",
-        names(games[games == input$game])
-      ))
       div(
         class = "game-title-bar",
-        h4(title),
+        h4(stored_title()),
         div(
           class = "game-title-meta",
           span(glue::glue("GIDB ID: {input$game}")),
@@ -125,150 +112,21 @@ mod_game_editor_server <- function(id, pool, user) {
 
     # Open the modal, prefilled with the stored title
     observeEvent(input$edit_game_title, {
-      current_title <- db_read_game_item(
-        conn = pool,
-        table = "games",
-        column = "game_title",
-        gidb_id = input$game
-      )
-      if (is.null(current_title) || is.na(current_title[1])) {
-        current_title <- ""
-      }
-
-      showModal(
-        modalDialog(
-          textInput(
-            inputId = ns("edited_game_title"),
-            label = "Edit title",
-            value = current_title
-          ),
-          footer = tagList(
-            actionButton(
-              inputId = ns("confirm_edit_game_title"),
-              label = "Confirm",
-              class = "btn-primary"
-            ),
-            modalButton("Cancel")
-          )
-        )
-      )
+      edit_game_title_modal()
     })
 
     # Write the new title, then refresh the selector labels
     observeEvent(input$confirm_edit_game_title, {
-      # Empty input would be coerced to SQL NULL by sql_null() and wipe the title.
+      # An empty value would be coerced to SQL NULL by sql_null().
       req(nzchar(trimws(input$edited_game_title)))
-
-      new_title <- trimws(input$edited_game_title)
-      result <- tryCatch(
-        db_update_game_item(
-          conn = pool,
-          table = "games",
-          column = "game_title",
-          value = new_title,
-          user_id = user$editor_id,
-          gidb_id = input$game
-        ),
-        error = function(e) e
-      )
-
-      # NULL means the UPDATE matched no row (e.g. the game was deleted).
-      if (inherits(result, "error")) {
-        showNotification(
-          paste("Update failed:", conditionMessage(result)),
-          type = "error"
-        )
-        return()
-      }
-      if (is.null(result)) {
-        showNotification(
-          "Update failed: no matching game row",
-          type = "error"
-        )
-        return()
-      }
-
-      removeModal()
-      loc$selected_game <- input$game
-      loc$observer_game_editor <- update_observer(loc$observer_game_editor)
-      showNotification(
-        paste(user$display_name, "updated the title to", new_title),
-        type = "message"
-      )
+      edit_game_title_db()
     })
 
     # Identifiers UI -----
-    game_editor_fields <- list(
-      list(
-        id = "mobygames_id",
-        column = "mobygames_id",
-        type = "integer",
-        label = tags$a(
-          "MobyGames ID",
-          href = "https://www.mobygames.com/",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        )
-      ),
-      list(
-        id = "igdb_id",
-        column = "igdb_id",
-        type = "integer",
-        label = tags$a(
-          "IGDB ID",
-          href = "https://www.igdb.com/",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        )
-      ),
-      list(
-        id = "steam_id",
-        column = "steam_id",
-        type = "integer",
-        label = tags$a(
-          "Steam ID",
-          href = "https://store.steampowered.com/",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        )
-      ),
-      list(
-        id = "gog_id",
-        column = "gog_id",
-        type = "integer",
-        label = tags$a(
-          "GOG ID",
-          href = "https://www.gog.com/",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        )
-      ),
-      list(
-        id = "itch_id",
-        column = "itch_id",
-        type = "text",
-        label = tags$a(
-          "itch.io slug",
-          href = "https://itch.io/",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        )
-      ),
-      list(
-        id = "wikidata_id",
-        column = "wikidata_id",
-        type = "text",
-        label = tags$a(
-          "Wikidata ID",
-          href = "https://www.wikidata.org/",
-          target = "_blank",
-          rel = "noopener noreferrer"
-        )
-      )
-    )
+    identifier_fields <- game_identifier_fields()
 
     purrr::walk(
-      game_editor_fields,
+      identifier_fields,
       function(field) {
         mod_game_item_server(
           field$id,
@@ -288,7 +146,7 @@ mod_game_editor_server <- function(id, pool, user) {
 
       tagList(
         purrr::map(
-          game_editor_fields,
+          identifier_fields,
           function(field) {
             mod_game_item_ui(
               id = ns(field$id),
@@ -299,8 +157,16 @@ mod_game_editor_server <- function(id, pool, user) {
         )
       )
     })
+    # New section below ----
 
-    # Section placeholder ----
+    # New game UI ----
+    observeEvent(input$new_game_manual, {
+      new_game_manual_modal()
+    })
+
+    observeEvent(input$new_game_api, {
+      new_game_api_modal()
+    })
   })
 }
 

@@ -7,6 +7,7 @@
 define_game_item_helpers <- function(env = parent.frame()) {
   evalq(
     {
+      # Update the UI for the game item
       update_game_item_ui <- function() {
         if (identical(type, "integer")) {
           updateNumericInput(session, "value", value = loc$stored_value)
@@ -15,6 +16,7 @@ define_game_item_helpers <- function(env = parent.frame()) {
         }
       }
 
+      # Update database entry for the game item
       update_game_item_db <- function() {
         result <- tryCatch(
           db_update_game_item(
