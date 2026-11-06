@@ -54,6 +54,27 @@ db_upsert_game <- function(
   gidb_id
 }
 
+# Insert a game carrying only its title
+#
+# game_title is the single NOT NULL column of the games table, so a manual
+# entry can be created before any identifier or detail is known. The timestamps
+# fall back to their column defaults.
+
+#' @noRd
+db_create_game <- function(conn, game_title, user_id = NULL) {
+  # sql_null(): glue_sql() turns a bare NULL into a zero-length string, which
+  # would take the whole statement with it.
+  query <- glue::glue_sql(
+    "INSERT INTO games (game_title, created_by, modified_by)
+     VALUES ({game_title}, {sql_null(user_id)}, {sql_null(user_id)})
+     RETURNING gidb_id",
+    .con = conn
+  )
+
+  result <- DBI::dbGetQuery(conn, query)
+  if (nrow(result) == 0) NULL else result$gidb_id[1]
+}
+
 # Update a single field of an existing game
 
 #' @noRd

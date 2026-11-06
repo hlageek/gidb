@@ -70,20 +70,22 @@ mod_game_editor_server <- function(id, pool, user) {
     define_game_editor_helpers(environment())
 
     ns <- session$ns
-    loc <- reactiveValues(observer_game_editor = 0)
+    loc <- reactiveValues(observer_game_editor = 0, selected_game = NULL)
 
-    # Fill the selector on launch with nothing selected; later runs only refresh
-    # its labels. The handler is isolated, so input$game is read as it stands
-    # and the current selection survives the refresh; with no selection at all
-    # the blank entry is used, which hides the editor UI (its outputs req() on
-    # input$game) until another game is picked.
+    # Fill the selector on launch with nothing selected; later runs refresh its
+    # labels and keep something selected. loc$selected_game overrides the
+    # current value -- a game that was just created is not in input$game yet --
+    # and the handler is isolated, so input$game is read as it stands. With
+    # nothing to select, the blank entry is used, which hides the editor UI
+    # (its outputs req() on input$game) until another game is picked.
     observeEvent(loc$observer_game_editor, {
       updateSelectInput(
         session = session,
         inputId = "game",
         choices = c("", db_list_games(pool)),
-        selected = input$game %||% ""
+        selected = loc$selected_game %||% input$game %||% ""
       )
+      loc$selected_game <- NULL
     })
 
     # Title UI -----
@@ -107,6 +109,25 @@ mod_game_editor_server <- function(id, pool, user) {
         )
       )
     })
+
+    # New game ----
+
+    # A title is all the games table requires, so a manual entry starts there
+    # and the details are filled in through the editor of the game this creates.
+    observeEvent(input$new_game_manual, {
+      new_game_manual_modal()
+    })
+
+    observeEvent(input$confirm_new_game, {
+      # game_title is NOT NULL; an empty value would reach SQL as NULL.
+      req(nzchar(trimws(input$new_game_title)))
+      new_game_db()
+    })
+
+    ## TODO ask for a MobyGames ID and fetch its metadata
+    # observeEvent(input$new_game_api, {
+    #   new_game_api_modal()
+    # })
 
     # Edit title  ----
 
@@ -156,16 +177,6 @@ mod_game_editor_server <- function(id, pool, user) {
           }
         )
       )
-    })
-    # New section below ----
-
-    # New game UI ----
-    observeEvent(input$new_game_manual, {
-      new_game_manual_modal()
-    })
-
-    observeEvent(input$new_game_api, {
-      new_game_api_modal()
     })
   })
 }

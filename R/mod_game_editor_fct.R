@@ -1,3 +1,39 @@
+#' Modal that asks for a game title
+#'
+#' Shared by both title flows -- creating a game and renaming one -- which
+#' differ only in the ids they use and the text they show.
+#'
+#' @param ns Namespace function of the calling module.
+#' @param input_id,button_id Unnamespaced ids of the text input and of the
+#'   button that confirms it.
+#' @param value Title to prefill the input with.
+#' @param label,button_label Text shown above the input and on the button.
+#' @noRd
+title_modal <- function(ns,
+                        input_id,
+                        button_id,
+                        value = "",
+                        label = "Game title",
+                        button_label = "Confirm") {
+  showModal(
+    modalDialog(
+      textInput(
+        inputId = ns(input_id),
+        label = label,
+        value = value
+      ),
+      footer = tagList(
+        actionButton(
+          inputId = ns(button_id),
+          label = button_label,
+          class = "btn-primary"
+        ),
+        modalButton("Cancel")
+      )
+    )
+  )
+}
+
 #' Define the game_editor helpers inside the module environment
 #'
 #' Same trick as define_game_item_helpers(): the helpers are evaluated in the
@@ -26,24 +62,64 @@ define_game_editor_helpers <- function(env = parent.frame()) {
         title[1]
       }
 
+      # Modal asking for the title of a new game
+      new_game_manual_modal <- function() {
+        title_modal(
+          ns = ns,
+          input_id = "new_game_title",
+          button_id = "confirm_new_game",
+          label = "New game title",
+          button_label = "Create"
+        )
+      }
+
+      # Insert the title only; the rest of the details are filled in through
+      # the editor once the new game is selected.
+      new_game_db <- function() {
+        new_title <- trimws(input$new_game_title)
+        result <- tryCatch(
+          db_create_game(
+            conn = pool,
+            game_title = new_title,
+            user_id = user$editor_id
+          ),
+          error = function(e) e
+        )
+
+        if (inherits(result, "error")) {
+          showNotification(
+            paste("Create failed:", conditionMessage(result)),
+            type = "error"
+          )
+          return()
+        }
+        if (is.null(result)) {
+          showNotification(
+            "Create failed: the game was not inserted",
+            type = "error"
+          )
+          return()
+        }
+
+        removeModal()
+        # Hand the new id to the selector observer: input$game still holds the
+        # previously selected game, if any.
+        loc$selected_game <- result
+        loc$observer_game_editor <- update_observer(loc$observer_game_editor)
+        showNotification(
+          paste(user$display_name, "created", new_title),
+          type = "message"
+        )
+      }
+
       # Modal for editing the game title
       edit_game_title_modal <- function() {
-        showModal(
-          modalDialog(
-            textInput(
-              inputId = ns("edited_game_title"),
-              label = "Edit title",
-              value = stored_title()
-            ),
-            footer = tagList(
-              actionButton(
-                inputId = ns("confirm_edit_game_title"),
-                label = "Confirm",
-                class = "btn-primary"
-              ),
-              modalButton("Cancel")
-            )
-          )
+        title_modal(
+          ns = ns,
+          input_id = "edited_game_title",
+          button_id = "confirm_edit_game_title",
+          value = stored_title(),
+          label = "Edit title"
         )
       }
 
