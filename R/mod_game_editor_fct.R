@@ -9,12 +9,14 @@
 #' @param value Title to prefill the input with.
 #' @param label,button_label Text shown above the input and on the button.
 #' @noRd
-title_modal <- function(ns,
-                        input_id,
-                        button_id,
-                        value = "",
-                        label = "Game title",
-                        button_label = "Confirm") {
+title_modal <- function(
+  ns,
+  input_id,
+  button_id,
+  value = "",
+  label = "Game title",
+  button_label = "Confirm"
+) {
   showModal(
     modalDialog(
       textInput(
@@ -63,7 +65,7 @@ define_game_editor_helpers <- function(env = parent.frame()) {
       }
 
       # Modal asking for the title of a new game
-      new_game_manual_modal <- function() {
+      create_game_manual_modal <- function() {
         title_modal(
           ns = ns,
           input_id = "new_game_title",
@@ -75,7 +77,7 @@ define_game_editor_helpers <- function(env = parent.frame()) {
 
       # Insert the title only; the rest of the details are filled in through
       # the editor once the new game is selected.
-      new_game_db <- function() {
+      create_game_db <- function() {
         new_title <- trimws(input$new_game_title)
         result <- tryCatch(
           db_create_game(

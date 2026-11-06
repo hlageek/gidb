@@ -4,13 +4,20 @@
 #' are the game titles.
 #'
 #' @param pool Database pool connection.
-#' @return A named integer vector (names = `game_title`). Empty vector when
-#'   the games table is empty.
+#' @return A named integer vector (names = `game_title`), sorted by title.
+#'   Empty vector when the games table is empty.
 #' @noRd
 db_list_games <- function(pool) {
+  # COLLATE: the database is initialised with the C collation, which compares
+  # byte by byte -- uppercase, digits and punctuation would all come before
+  # lowercase, and accented letters after z. The ICU collation compares the way
+  # the alphabet reads instead (Postgres >= 12). Without ICU, lower(game_title)
+  # is the fallback; it fixes the case, not the accents.
   result <- DBI::dbGetQuery(
     pool,
-    "SELECT gidb_id, game_title FROM games ORDER BY game_title, gidb_id"
+    'SELECT gidb_id, game_title
+     FROM games
+     ORDER BY game_title COLLATE "und-x-icu", gidb_id'
   )
 
   ids <- result$gidb_id

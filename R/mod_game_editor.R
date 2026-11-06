@@ -91,8 +91,7 @@ mod_game_editor_server <- function(id, pool, user) {
     # Title UI -----
     output$game_title <- renderUI({
       req(input$game)
-      # Read as a trigger: the stored title is not reactive, so without this it
-      # would keep its old text after a rename.
+      # Read as a trigger:
       loc$observer_game_editor
 
       div(
@@ -115,13 +114,13 @@ mod_game_editor_server <- function(id, pool, user) {
     # A title is all the games table requires, so a manual entry starts there
     # and the details are filled in through the editor of the game this creates.
     observeEvent(input$new_game_manual, {
-      new_game_manual_modal()
+      create_game_manual_modal() # input$new_game_title
     })
 
     observeEvent(input$confirm_new_game, {
       # game_title is NOT NULL; an empty value would reach SQL as NULL.
       req(nzchar(trimws(input$new_game_title)))
-      new_game_db()
+      create_game_db()
     })
 
     ## TODO ask for a MobyGames ID and fetch its metadata
@@ -133,10 +132,10 @@ mod_game_editor_server <- function(id, pool, user) {
 
     # Open the modal, prefilled with the stored title
     observeEvent(input$edit_game_title, {
-      edit_game_title_modal()
+      edit_game_title_modal() # input$edited_game_title
     })
 
-    # Write the new title, then refresh the selector labels
+    # Write the edited title, then refresh the selector labels
     observeEvent(input$confirm_edit_game_title, {
       # An empty value would be coerced to SQL NULL by sql_null().
       req(nzchar(trimws(input$edited_game_title)))
