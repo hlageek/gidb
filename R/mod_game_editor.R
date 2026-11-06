@@ -78,17 +78,17 @@ mod_game_editor_server <- function(id, pool, user) {
     loc$observer_game_editor <- 0
     loc$selected_game <- NULL
 
-    # Set game selector
+    # Fill the selector on launch with nothing selected; later runs only refresh
+    # its labels. loc$selected_game carries the current selection through a
+    # refresh; with none to carry, the blank entry is selected instead, which
+    # hides the editor UI (its outputs req() on input$game) until another game
+    # is picked.
     observeEvent(loc$observer_game_editor, {
-      req(loc$observer_game_editor)
-      if (loc$observer_game_editor > 0) {
-        req(loc$selected_game)
-      }
       updateSelectInput(
         session = session,
         inputId = "game",
         choices = c("", db_list_games(pool)),
-        selected = loc$selected_game
+        selected = loc$selected_game %||% ""
       )
       loc$selected_game <- NULL
     })
@@ -96,6 +96,9 @@ mod_game_editor_server <- function(id, pool, user) {
     # Title UI -----
     output$game_title <- renderUI({
       req(input$game)
+      # Read as a trigger: db_list_games() is not reactive, so without this the
+      # title would keep its old text after a rename.
+      loc$observer_game_editor
 
       games <- db_list_games(pool)
       title <- trimws(gsub(
@@ -110,11 +113,87 @@ mod_game_editor_server <- function(id, pool, user) {
           class = "game-title-meta",
           span(glue::glue("GIDB ID: {input$game}")),
           actionButton(
-            ns("edit_title"),
+            ns("edit_game_title"),
             label = "",
             icon = bsicons::bs_icon("pencil")
           )
         )
+      )
+    })
+
+    # Edit title  ----
+
+    # Open the modal, prefilled with the stored title
+    observeEvent(input$edit_game_title, {
+      current_title <- db_read_game_item(
+        conn = pool,
+        table = "games",
+        column = "game_title",
+        gidb_id = input$game
+      )
+      if (is.null(current_title) || is.na(current_title[1])) {
+        current_title <- ""
+      }
+
+      showModal(
+        modalDialog(
+          textInput(
+            inputId = ns("edited_game_title"),
+            label = "Edit title",
+            value = current_title
+          ),
+          footer = tagList(
+            actionButton(
+              inputId = ns("confirm_edit_game_title"),
+              label = "Confirm",
+              class = "btn-primary"
+            ),
+            modalButton("Cancel")
+          )
+        )
+      )
+    })
+
+    # Write the new title, then refresh the selector labels
+    observeEvent(input$confirm_edit_game_title, {
+      # Empty input would be coerced to SQL NULL by sql_null() and wipe the title.
+      req(nzchar(trimws(input$edited_game_title)))
+
+      new_title <- trimws(input$edited_game_title)
+      result <- tryCatch(
+        db_update_game_item(
+          conn = pool,
+          table = "games",
+          column = "game_title",
+          value = new_title,
+          user_id = user$editor_id,
+          gidb_id = input$game
+        ),
+        error = function(e) e
+      )
+
+      # NULL means the UPDATE matched no row (e.g. the game was deleted).
+      if (inherits(result, "error")) {
+        showNotification(
+          paste("Update failed:", conditionMessage(result)),
+          type = "error"
+        )
+        return()
+      }
+      if (is.null(result)) {
+        showNotification(
+          "Update failed: no matching game row",
+          type = "error"
+        )
+        return()
+      }
+
+      removeModal()
+      loc$selected_game <- input$game
+      loc$observer_game_editor <- update_observer(loc$observer_game_editor)
+      showNotification(
+        paste(user$display_name, "updated the title to", new_title),
+        type = "message"
       )
     })
 
@@ -220,6 +299,8 @@ mod_game_editor_server <- function(id, pool, user) {
         )
       )
     })
+
+    # Section placeholder ----
   })
 }
 
