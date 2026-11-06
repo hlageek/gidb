@@ -1,4 +1,85 @@
 # R/db_creates.R
+# Upsert a game into the database
+
+#' @noRd
+db_upsert_game <- function(
+  conn,
+  identifiers,
+  info,
+  user_id = NULL,
+  gidb_id = NULL
+) {
+  release_year <- suppressWarnings(as.integer(info$release_year))
+
+  if (is.null(gidb_id)) {
+    # INSERT new game
+    query <- glue::glue_sql(
+      "INSERT INTO games (
+       mobygames_id, igdb_id, steam_id, gog_id, wikidata_id,
+       game_title, game_year, game_url, status,
+       created_by, modified_by, created_at, modified_at
+     ) VALUES (
+       {sql_null(identifiers$moby_id)},
+       {sql_null(identifiers$igdb_id)},
+       {sql_null(identifiers$steam_id)},
+       {sql_null(identifiers$gog_id)},
+       {sql_null(identifiers$gog_id)},
+       {sql_null(info$title)},
+       {sql_null(release_year)},
+       {sql_null(info$official_url)},
+       'draft',
+       {user_id},
+       {user_id},
+       NOW(),
+       NOW()
+     ) RETURNING gidb_id",
+      .con = conn
+    )
+
+    result <- DBI::dbGetQuery(conn, query)
+    return(result$gidb_id[1])
+  }
+
+  # UPDATE existing game
+  query <- glue::glue_sql(
+    "UPDATE games SET
+       mobygames_id = {sql_null(identifiers$moby_id)}, igdb_id = {sql_null(identifiers$id_igdb)},
+       steam_id = {sql_null(identifiers$steam_id)}, gog_id = {sql_null(identifiers$gog_id)},
+       game_title = {sql_null(info$title)}, game_year = {sql_null(release_year)}, game_url = {sql_null(info$official_url)},
+       modified_by = {user_id}, modified_at = now()
+     WHERE gidb_id = {gidb_id}",
+    .con = conn
+  )
+  DBI::dbExecute(conn, query)
+  gidb_id
+}
+
+# Update a single field of an existing game
+
+#' @noRd
+db_update_game_item <- function(
+  conn,
+  table,
+  column,
+  value,
+  user_id = NULL,
+  gidb_id = NULL
+) {
+  value <- sql_null(value)
+
+  query <- glue::glue_sql(
+    "UPDATE {`table`} SET
+       {`column`} = {value},
+       modified_by = {user_id},
+       modified_at = NOW()
+     WHERE gidb_id = {gidb_id}
+     RETURNING gidb_id",
+    .con = conn
+  )
+
+  result <- DBI::dbGetQuery(conn, query)
+  if (nrow(result) == 0) NULL else result$gidb_id[1]
+}
 
 #' @noRd
 db_create_category <- function(pool, category_value, category_source) {
@@ -36,8 +117,16 @@ db_create_originator <- function(
   originator_description = NULL
 ) {
   # Use sql_null helper for proper NULL handling
-  moby_val <- if (is.na(originator_mobygames_id)) DBI::SQL("NULL") else originator_mobygames_id
-  igdb_val <- if (is.na(originator_igdb_id)) DBI::SQL("NULL") else originator_igdb_id
+  moby_val <- if (is.na(originator_mobygames_id)) {
+    DBI::SQL("NULL")
+  } else {
+    originator_mobygames_id
+  }
+  igdb_val <- if (is.na(originator_igdb_id)) {
+    DBI::SQL("NULL")
+  } else {
+    originator_igdb_id
+  }
   desc_val <- sql_null(originator_description)
 
   query <- glue::glue_sql(
@@ -49,60 +138,6 @@ db_create_originator <- function(
   DBI::dbGetQuery(pool, query)$originator_id[1]
 }
 
-
-# R/db_write_game.R
-
-#' @noRd
-db_write_game <- function(
-  conn,
-  info,
-  identifiers,
-  user_id = NULL,
-  gidb_id = NULL
-) {
-  release_year <- suppressWarnings(as.integer(info$release_year))
-
-  if (is.null(gidb_id)) {
-    # INSERT new game
-    query <- glue::glue_sql(
-      "INSERT INTO games (
-       mobygames_id, igdb_id, steam_id, gog_id,
-       game_title, game_year, game_url, status,
-       created_by, modified_by, created_at, modified_at
-     ) VALUES (
-       {sql_null(identifiers$moby_id)},
-       {sql_null(identifiers$id_igdb)},
-       {sql_null(identifiers$steam_id)},
-       {sql_null(identifiers$gog_id)},
-       {sql_null(info$title)},
-       {sql_null(release_year)},
-       {sql_null(info$official_url)},
-       'draft',
-       {user_id},
-       {user_id},
-       NOW(),
-       NOW()
-     ) RETURNING gidb_id",
-      .con = conn
-    )
-
-    result <- DBI::dbGetQuery(conn, query)
-    return(result$gidb_id[1])
-  }
-
-  # UPDATE existing game
-  query <- glue::glue_sql(
-    "UPDATE games SET
-       mobygames_id = {sql_null(identifiers$moby_id)}, igdb_id = {sql_null(identifiers$id_igdb)},
-       steam_id = {sql_null(identifiers$steam_id)}, gog_id = {sql_null(identifiers$gog_id)},
-       game_title = {sql_null(info$title)}, game_year = {sql_null(release_year)}, game_url = {sql_null(info$official_url)},
-       modified_by = {user_id}, modified_at = now()
-     WHERE gidb_id = {gidb_id}",
-    .con = conn
-  )
-  DBI::dbExecute(conn, query)
-  gidb_id
-}
 
 # R/db_write_maps.R
 
@@ -276,47 +311,50 @@ db_save_game <- function(pool, game_data, user_id, gidb_id = NULL) {
 #' @return TRUE if deletion was successful, FALSE otherwise.
 #' @noRd
 db_delete_game <- function(pool, gidb_id) {
-  tryCatch({
-    pool::poolWithTransaction(pool, function(conn) {
-      # Delete notes_games_map entries
-      DBI::dbExecute(
-        conn,
-        glue::glue_sql(
-          "DELETE FROM notes_games_map WHERE gidb_id = {gidb_id}",
-          .con = conn
+  tryCatch(
+    {
+      pool::poolWithTransaction(pool, function(conn) {
+        # Delete notes_games_map entries
+        DBI::dbExecute(
+          conn,
+          glue::glue_sql(
+            "DELETE FROM notes_games_map WHERE gidb_id = {gidb_id}",
+            .con = conn
+          )
         )
-      )
 
-      # Delete tags_games_map entries
-      DBI::dbExecute(
-        conn,
-        glue::glue_sql(
-          "DELETE FROM tags_games_map WHERE gidb_id = {gidb_id}",
-          .con = conn
+        # Delete tags_games_map entries
+        DBI::dbExecute(
+          conn,
+          glue::glue_sql(
+            "DELETE FROM tags_games_map WHERE gidb_id = {gidb_id}",
+            .con = conn
+          )
         )
-      )
 
-      # Delete originators_games_map entries
-      DBI::dbExecute(
-        conn,
-        glue::glue_sql(
-          "DELETE FROM originators_games_map WHERE gidb_id = {gidb_id}",
-          .con = conn
+        # Delete originators_games_map entries
+        DBI::dbExecute(
+          conn,
+          glue::glue_sql(
+            "DELETE FROM originators_games_map WHERE gidb_id = {gidb_id}",
+            .con = conn
+          )
         )
-      )
 
-      # Finally, delete the game itself
-      DBI::dbExecute(
-        conn,
-        glue::glue_sql(
-          "DELETE FROM games WHERE gidb_id = {gidb_id}",
-          .con = conn
+        # Finally, delete the game itself
+        DBI::dbExecute(
+          conn,
+          glue::glue_sql(
+            "DELETE FROM games WHERE gidb_id = {gidb_id}",
+            .con = conn
+          )
         )
-      )
 
-      TRUE
-    })
-  }, error = function(e) {
-    FALSE
-  })
+        TRUE
+      })
+    },
+    error = function(e) {
+      FALSE
+    }
+  )
 }

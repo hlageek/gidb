@@ -9,21 +9,25 @@
 #' @importFrom shiny NS tagList
 mod_game_item_ui <- function(id, type = NULL, label = NULL) {
   ns <- NS(id)
-  if (identical(type, "integer")) {
-    numericInput(
-      inputId = ns("value"),
-      label = label,
-      value = NA,
-      updateOn = "blur"
-    )
-  } else {
-    textInput(
-      inputId = ns("value"),
-      label = label,
-      value = "",
-      updateOn = "blur"
-    )
-  }
+
+  div(
+    class = "game-item",
+    if (identical(type, "integer")) {
+      numericInput(
+        inputId = ns("value"),
+        label = label,
+        value = NA,
+        updateOn = "blur"
+      )
+    } else {
+      textInput(
+        inputId = ns("value"),
+        label = label,
+        value = "",
+        updateOn = "blur"
+      )
+    }
+  )
 }
 
 #' game_item Server Functions
@@ -47,9 +51,23 @@ mod_game_item_server <- function(
   gidb_id = NULL
 ) {
   moduleServer(id, function(input, output, session) {
+    # The helpers live in mod_game_item_fct.R but are evaluated in this frame,
+    # so they can use input/session/loc/pool/... without argument plumbing.
+    define_game_item_helpers(environment())
+
     stopifnot(is.reactive(gidb_id))
 
-    loc <- reactiveValues(gidb_id = NULL)
+    # Normalise a value for comparison across the client boundary: DB NULL,
+    # numeric NA and "" compare equal, and as.character() bridges the
+    # integer/double difference (12345L in R comes back as 12345).
+    value_key <- function(x) {
+      if (is.null(x) || length(x) == 0 || is.na(x[1])) {
+        return("")
+      }
+      as.character(x[1])
+    }
+
+    loc <- reactiveValues(gidb_id = NULL, stored_value = NULL)
 
     # Mirror the reactive into loc so the rest of the module can read it as
     # plain state: loc$gidb_id. Clearing has to happen in an observer: a bare
@@ -57,19 +75,45 @@ mod_game_item_server <- function(
     observe({
       loc$gidb_id <- gidb_id()
     })
+
+    observeEvent(
+      loc$gidb_id,
+      {
+        req(loc$gidb_id)
+
+        value <- db_read_game_item(
+          conn = pool,
+          table = table,
+          column = column,
+          gidb_id = loc$gidb_id
+        )
+
+        if (is.null(value) || length(value) == 0 || is.na(value[1])) {
+          value <- ""
+        }
+
+        # Remember what the DB returned before showing it, so the input event
+        # that update*Input() triggers is recognised as an echo.
+        loc$stored_value <- value
+        update_game_item_ui()
+      }
+    )
     # The field now lives in the UI from page load, so its first value is
-    # NULL/empty and cannot trigger this. ignoreInit = TRUE is belt-and-braces.
+    # NULL/empty and cannot trigger this.
     observeEvent(
       input$value,
       {
         req(loc$gidb_id, input$value)
 
-        showNotification(
-          glue::glue(
-            "{user$display_name} updated {loc$gidb_id} to {input$value}"
-          ),
-          type = "message"
-        )
+        # update*Input() re-fires input$value; ignore that echo.
+        if (identical(value_key(input$value), value_key(loc$stored_value))) {
+          return()
+        }
+
+        # Only remember the value once the DB accepted it.
+        if (!is.null(update_game_item_db())) {
+          loc$stored_value <- input$value
+        }
       }
     )
   })

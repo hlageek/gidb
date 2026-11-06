@@ -18,6 +18,66 @@
         margin-bottom: 5rem;
       }
 
+      /* ── Game title bar: title left, GIDB id + edit pencil right ── */
+      .game-title-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+      }
+      .game-title-bar h4 {
+        margin: 0;
+      }
+      .game-title-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #6c757d;
+        font-size: 0.875rem;
+        white-space: nowrap;
+      }
+      .game-title-meta .btn {
+        padding: 0.1rem 0.35rem;
+        line-height: 1;
+      }
+
+      /* ── Identifiers panel: inline fields, no x overflow ── */
+      .game-identifiers {
+        display: grid;
+        /* Equal-width columns: every .game-item gets the same size, and a
+           lone item on the last row stays in one cell instead of filling it.
+           auto-fill keeps empty tracks, so one item never stretches. */
+        grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        row-gap: 0.5rem;
+      }
+      .game-identifiers .game-item {
+        min-width: 0; /* lets items shrink instead of overflowing */
+        padding-right: 0.75rem;
+        box-sizing: border-box;
+      }
+      .game-identifiers .game-item .shiny-input-container {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+      }
+
+      /* ── Hide the up/down steppers on number inputs ── */
+      /* Chrome, Edge, Safari, Opera */
+      .game-item input[type="number"]::-webkit-outer-spin-button,
+      .game-item input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      /* Firefox */
+      .game-item input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+
       /* ── Accordion headers ── */
       .accordion-button {
         background-color: #f8f9fa !important;

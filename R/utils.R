@@ -14,3 +14,10 @@ sql_null <- function(x) {
     x
   }
 }
+
+#' Update an internal count observer.
+#' @noRd
+update_observer <- function(observer) {
+  observer <- observer + 1
+  return(observer)
+}

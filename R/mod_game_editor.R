@@ -19,7 +19,7 @@ mod_game_editor_ui <- function(id) {
         selectInput(
           inputId = ns("game"),
           label = "",
-          choices = c("", "test", "retest")
+          choices = ""
         ),
         "or enter new game",
         wellPanel(
@@ -33,19 +33,22 @@ mod_game_editor_ui <- function(id) {
           )
         )
       ),
-      bslib::accordion(
-        id = ns("game_editor"),
-        open = "identifiers",
-        bslib::accordion_panel(
-          icon = bsicons::bs_icon("upc"),
-          title = "Identifiers",
-          value = "identifiers",
-          uiOutput(ns("panel_identifiers_ui"))
-        ),
-        bslib::accordion_panel(
-          icon = bsicons::bs_icon("info-circle"),
-          title = "Core info",
-          value = "core"
+      div(
+        uiOutput(ns("game_title")),
+        bslib::accordion(
+          id = ns("game_editor"),
+          open = "identifiers",
+          bslib::accordion_panel(
+            icon = bsicons::bs_icon("upc"),
+            title = "Identifiers",
+            value = "identifiers",
+            uiOutput(ns("panel_identifiers_ui"), class = "game-identifiers")
+          ),
+          bslib::accordion_panel(
+            icon = bsicons::bs_icon("info-circle"),
+            title = "Core info",
+            value = "core"
+          )
         )
       )
     )
@@ -59,10 +62,6 @@ mod_game_editor_ui <- function(id) {
 #' per entry) -- so module id, label and DB column cannot drift apart.
 #'
 #' @noRd
-game_editor_fields <- list(
-  list(id = "mobygames_id", label = "MobyGames ID", column = "mobygames_id", type = "integer"),
-  list(id = "igdb_id", label = "IGDB ID", column = "igdb_id", type = "integer")
-)
 
 #' game_editor Server Function
 #'
@@ -75,10 +74,120 @@ game_editor_fields <- list(
 mod_game_editor_server <- function(id, pool, user) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    loc <- reactiveValues()
+    loc$observer_game_editor <- 0
+    loc$selected_game <- NULL
 
-    # Start each field's server once, here. Server modules return observers,
-    # not UI -- they must never be called from renderUI(). walk() is the
-    # side-effect counterpart of map(); the returned observers are not needed.
+    # Set game selector
+    observeEvent(loc$observer_game_editor, {
+      req(loc$observer_game_editor)
+      if (loc$observer_game_editor > 0) {
+        req(loc$selected_game)
+      }
+      updateSelectInput(
+        session = session,
+        inputId = "game",
+        choices = c("", db_list_games(pool)),
+        selected = loc$selected_game
+      )
+      loc$selected_game <- NULL
+    })
+
+    # Title UI -----
+    output$game_title <- renderUI({
+      req(input$game)
+
+      games <- db_list_games(pool)
+      title <- trimws(gsub(
+        "(.*)\\(GIDB:.*\\)",
+        "\\1",
+        names(games[games == input$game])
+      ))
+      div(
+        class = "game-title-bar",
+        h4(title),
+        div(
+          class = "game-title-meta",
+          span(glue::glue("GIDB ID: {input$game}")),
+          actionButton(
+            ns("edit_title"),
+            label = "",
+            icon = bsicons::bs_icon("pencil")
+          )
+        )
+      )
+    })
+
+    # Identifiers UI -----
+    game_editor_fields <- list(
+      list(
+        id = "mobygames_id",
+        column = "mobygames_id",
+        type = "integer",
+        label = tags$a(
+          "MobyGames ID",
+          href = "https://www.mobygames.com/",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        )
+      ),
+      list(
+        id = "igdb_id",
+        column = "igdb_id",
+        type = "integer",
+        label = tags$a(
+          "IGDB ID",
+          href = "https://www.igdb.com/",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        )
+      ),
+      list(
+        id = "steam_id",
+        column = "steam_id",
+        type = "integer",
+        label = tags$a(
+          "Steam ID",
+          href = "https://store.steampowered.com/",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        )
+      ),
+      list(
+        id = "gog_id",
+        column = "gog_id",
+        type = "integer",
+        label = tags$a(
+          "GOG ID",
+          href = "https://www.gog.com/",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        )
+      ),
+      list(
+        id = "itch_id",
+        column = "itch_id",
+        type = "text",
+        label = tags$a(
+          "itch.io slug",
+          href = "https://itch.io/",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        )
+      ),
+      list(
+        id = "wikidata_id",
+        column = "wikidata_id",
+        type = "text",
+        label = tags$a(
+          "Wikidata ID",
+          href = "https://www.wikidata.org/",
+          target = "_blank",
+          rel = "noopener noreferrer"
+        )
+      )
+    )
+
     purrr::walk(
       game_editor_fields,
       function(field) {
@@ -95,9 +204,6 @@ mod_game_editor_server <- function(id, pool, user) {
       }
     )
 
-    # renderUI() only builds UI, for modules that already exist above.
-    # ns is session$ns(), so the ids line up with the module namespaces:
-    # game_editor_1-mobygames_id-value.
     output$panel_identifiers_ui <- renderUI({
       req(input$game)
 
