@@ -249,6 +249,32 @@ game_identifier_fields <- function() {
   )
 }
 
+# Info fields of the game editor.
+
+#' @noRd
+game_info_fields <- function() {
+  list(
+    list(
+      id = "game_year",
+      column = "game_year",
+      type = "integer",
+      label = "Release year"
+    ),
+    list(
+      id = "game_url",
+      column = "game_url",
+      type = "character",
+      label = "Game URL"
+    ),
+    list(
+      id = "game_description",
+      column = "game_description",
+      type = "text",
+      label = "Game description"
+    )
+  )
+}
+
 
 #' Append the gidb_ids to the titles of a named id vector
 #'

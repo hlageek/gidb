@@ -9,10 +9,6 @@ define_game_item_helpers <- function(env = parent.frame()) {
     {
       # Show the stored value in the widget this item was built with
       update_game_item_ui <- function() {
-        # The text widgets assign the value straight to el.value, so an empty
-        # field has to arrive as ""; NA or NULL would read back as "NA"/"null".
-        # The number input is the opposite: NA is what empties it, a NULL would
-        # be dropped from the message and change nothing.
         value <- loc$stored_value
         if (is.null(value) || length(value) == 0 || is.na(value[1])) {
           value <- ""
@@ -59,6 +55,12 @@ define_game_item_helpers <- function(env = parent.frame()) {
         }
         label_text <- strip_html(as.character(label_text))
 
+        display_value <- if (nchar(input$value) > 100) {
+          paste0(substr(input$value, 1, 100), "...")
+        } else {
+          input$value
+        }
+
         # NULL means the UPDATE matched no row (e.g. the game was deleted).
         if (is.null(result)) {
           showNotification(
@@ -70,7 +72,7 @@ define_game_item_helpers <- function(env = parent.frame()) {
 
         showNotification(
           glue::glue(
-            "{user$display_name} updated {label_text} to {input$value}"
+            "{user$display_name} updated {label_text} to {display_value}"
           ),
           type = "message"
         )

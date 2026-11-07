@@ -68,8 +68,8 @@ mod_game_item_ui <- function(id, type = NULL, label = NULL) {
     )
   )
 
-  # .game-item-multiline asks the identifiers grid for a whole row; see the
-  # rules in custom.css.
+  # .game-item-multiline asks the grid for a whole row; see the rules in
+  # custom.css.
   div(
     class = paste(
       c(

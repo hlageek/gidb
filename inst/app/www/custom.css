@@ -18,6 +18,24 @@
         margin-bottom: 5rem;
       }
 
+      /* ── Scrolling editor ──
+         overflow alone is not enough: a box of its own height (height: auto)
+         grows with its content, so it never overflows and has nothing to
+         scroll. The height has to be bounded first. 11rem stands for what sits
+         above the accordion -- the page padding, the gidb heading, the tab
+         strip and the game title bar -- so raise it if any of that grows and
+         lower it to give the fields more room. dvh is the viewport the browser
+         actually has left (mobile toolbars); a browser that does not know it
+         keeps the vh line above.
+         auto, not scroll: scroll keeps an empty gutter even when nothing
+         overflows, and it turns overflow-x from visible to auto as well, which
+         is where a stray horizontal bar comes from. */
+      .game-editor-scroll {
+        max-height: calc(100vh - 11rem);
+        max-height: calc(100dvh - 11rem);
+        overflow-y: auto;
+      }
+
       /* ── Game title bar: title left, GIDB id + edit pencil right ── */
       .game-title-bar {
         display: flex;
@@ -64,11 +82,24 @@
         max-width: 100%;
         margin-bottom: 0;
       }
+      /* A url does not read in one cell, so it takes the whole row. Matched on
+         the input id instead of a class: the field itself stays unremarkable in
+         R, and the $= suffix still matches once the module prefix is prepended
+         (game_editor_1-game_url-value). Tracks are all equal, so spanning is
+         the only way a field gets wider here -- min/max-width on the input
+         itself is capped by its own track. A browser without :has() drops the
+         rule, which only costs the width. */
+      .game-identifiers .game-item:has([id$="-game_url-value"]) {
+        grid-column: 1 / -1;
+      }
+      .game-identifiers .game-item:has([id$="-game_description-value"]) {
+        grid-column: 1 / -1;
+      }
       /* A multi line field is unreadable in one 180px cell, so it takes the
          whole row instead. .game-item-multiline is set by mod_game_item_ui()
          for type = "text". */
       .game-identifiers .game-item-multiline {
-        grid-column: 1 / -1;
+        grid-column: span 2;
       }
       .game-item-multiline textarea {
         width: 100%;

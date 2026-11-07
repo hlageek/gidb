@@ -54,20 +54,25 @@ mod_game_editor_ui <- function(id) {
       ),
       div(
         uiOutput(ns("game_title")),
-        bslib::accordion(
-          id = ns("game_editor"),
-          open = "identifiers",
-          bslib::accordion_panel(
-            icon = bsicons::bs_icon("upc"),
-            title = "Identifiers",
-            value = "identifiers",
-            uiOutput(ns("panel_identifiers_ui"), class = "game-identifiers")
-          ),
-          bslib::accordion_panel(
-            icon = bsicons::bs_icon("info-circle"),
-            title = "Core info",
-            value = "core",
-            uiOutput(ns("panel_info_ui"), class = "game-identifiers")
+        # .game-editor-scroll: the panels grow past the screen once a game is
+        # loaded, so the accordion scrolls inside the viewport; see custom.css.
+        div(
+          class = "game-editor-scroll",
+          bslib::accordion(
+            id = ns("game_editor"),
+            open = TRUE,
+            bslib::accordion_panel(
+              icon = bsicons::bs_icon("upc"),
+              title = "Identifiers",
+              value = "identifiers",
+              uiOutput(ns("panel_identifiers_ui"), class = "game-identifiers")
+            ),
+            bslib::accordion_panel(
+              icon = bsicons::bs_icon("info-circle"),
+              title = "Core info",
+              value = "core",
+              uiOutput(ns("panel_info_ui"), class = "game-identifiers")
+            )
           )
         )
       )
@@ -277,6 +282,16 @@ mod_game_editor_server <- function(id, pool, user) {
         )
       )
     })
+
+    # A rolled up accordion panel is display:none, and shiny does not render an
+    # output while it is hidden. The fields would then only be created once the
+    # editor unrolls the panel, which is after the game_item observers pushed
+    # their values into inputs that did not exist yet -- an update the browser
+    # never saw cannot be applied later, so the panel opened empty. Rendering
+    # anyway keeps the fields in the DOM, hidden with their panel, where the
+    # update reaches them and unrolling only reveals what they already hold.
+    outputOptions(output, "panel_identifiers_ui", suspendWhenHidden = FALSE)
+    outputOptions(output, "panel_info_ui", suspendWhenHidden = FALSE)
   })
 }
 
