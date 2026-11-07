@@ -7,13 +7,27 @@
 define_game_item_helpers <- function(env = parent.frame()) {
   evalq(
     {
-      # Update the UI for the game item
+      # Show the stored value in the widget this item was built with
       update_game_item_ui <- function() {
-        if (identical(type, "integer")) {
-          updateNumericInput(session, "value", value = loc$stored_value)
-        } else {
-          updateTextInput(session, "value", value = loc$stored_value)
+        # The text widgets assign the value straight to el.value, so an empty
+        # field has to arrive as ""; NA or NULL would read back as "NA"/"null".
+        # The number input is the opposite: NA is what empties it, a NULL would
+        # be dropped from the message and change nothing.
+        value <- loc$stored_value
+        if (is.null(value) || length(value) == 0 || is.na(value[1])) {
+          value <- ""
         }
+
+        switch(
+          game_item_type(type),
+          "integer" = updateNumericInput(
+            session,
+            "value",
+            value = loc$stored_value
+          ),
+          "character" = updateTextInput(session, "value", value = value),
+          "text" = updateTextAreaInput(session, "value", value = value)
+        )
       }
 
       # Update database entry for the game item

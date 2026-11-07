@@ -1,7 +1,8 @@
 #' Modal that asks for a game title
 #'
-#' Shared by both title flows -- creating a game and renaming one -- which
-#' differ only in the ids they use and the text they show.
+#' A plain text input over which the caller chooses the ids and the wording, so
+#' a title can be asked for without hard-coding ids in each flow. New games do
+#' not use it: their title is typed straight into the editor's side panel.
 #'
 #' @param ns Namespace function of the calling module.
 #' @param input_id,button_id Unnamespaced ids of the text input and of the
@@ -64,15 +65,14 @@ define_game_editor_helpers <- function(env = parent.frame()) {
         title[1]
       }
 
-      # Modal asking for the title of a new game
-      create_game_manual_modal <- function() {
-        title_modal(
-          ns = ns,
-          input_id = "new_game_title",
-          button_id = "confirm_new_game",
-          label = "New game title",
-          button_label = "Create"
-        )
+      # Empty both new-game panels: once when the page reports its inputs, and
+      # after a click has been answered. The panels stay on screen, so a stored
+      # username or the previous entry would otherwise still be there. NA clears
+      # the numeric input -- updateNumericInput() drops a NULL value and would
+      # change nothing.
+      clear_new_game_inputs <- function() {
+        updateTextInput(session, "new_game_title", value = "")
+        updateNumericInput(session, "new_game_mobygames_id", value = NA)
       }
 
       # Insert the title only; the rest of the details are filled in through
@@ -103,7 +103,9 @@ define_game_editor_helpers <- function(env = parent.frame()) {
           return()
         }
 
-        removeModal()
+        # The panel stays on screen, so empty it: a second click would create a
+        # second game with the same title.
+        clear_new_game_inputs()
         # Hand the new id to the selector observer: input$game still holds the
         # previously selected game, if any.
         loc$selected_game <- result
@@ -225,7 +227,7 @@ game_identifier_fields <- function() {
     list(
       id = "itch_id",
       column = "itch_id",
-      type = "text",
+      type = "character",
       label = tags$a(
         "itch.io slug",
         href = "https://itch.io/",
@@ -236,7 +238,7 @@ game_identifier_fields <- function() {
     list(
       id = "wikidata_id",
       column = "wikidata_id",
-      type = "text",
+      type = "character",
       label = tags$a(
         "Wikidata ID",
         href = "https://www.wikidata.org/",
@@ -245,4 +247,20 @@ game_identifier_fields <- function() {
       )
     )
   )
+}
+
+
+#' Append the gidb_ids to the titles of a named id vector
+#'
+#' @param x Named vector of ids (names = titles), as db_list_games() returns it.
+#' @return `x` with its names suffixed ` (GIDB: <id>)`.
+#' @noRd
+add_gidb_ids <- function(x) {
+  if (length(x) == 0) {
+    return(x)
+  }
+
+  ids <- unname(x)
+  names(ids) <- paste0(names(x), " (GIDB: ", ids, ")")
+  ids
 }

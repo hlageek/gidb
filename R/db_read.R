@@ -21,7 +21,7 @@ db_list_games <- function(pool) {
   )
 
   ids <- result$gidb_id
-  names(ids) <- paste0(result$game_title, " (GIDB: ", ids, ")")
+  names(ids) <- result$game_title
   ids
 }
 

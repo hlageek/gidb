@@ -64,16 +64,29 @@
         max-width: 100%;
         margin-bottom: 0;
       }
+      /* A multi line field is unreadable in one 180px cell, so it takes the
+         whole row instead. .game-item-multiline is set by mod_game_item_ui()
+         for type = "text". */
+      .game-identifiers .game-item-multiline {
+        grid-column: 1 / -1;
+      }
+      .game-item-multiline textarea {
+        width: 100%;
+        min-height: 6rem;
+        resize: vertical; /* taller by dragging, but never narrower */
+      }
 
-      /* ── Hide the up/down steppers on number inputs ── */
+      /* ── Hide the up/down steppers on number inputs ──
+         Put .no-num-ticks on any container of the input -- a .game-item wrapper,
+         a wellPanel, ... -- since shiny gives no way to class the input itself. */
       /* Chrome, Edge, Safari, Opera */
-      .game-item input[type="number"]::-webkit-outer-spin-button,
-      .game-item input[type="number"]::-webkit-inner-spin-button {
+      .no-num-ticks input[type="number"]::-webkit-outer-spin-button,
+      .no-num-ticks input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
       /* Firefox */
-      .game-item input[type="number"] {
+      .no-num-ticks input[type="number"] {
         -moz-appearance: textfield;
         appearance: textfield;
       }

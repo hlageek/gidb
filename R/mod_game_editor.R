@@ -16,20 +16,39 @@ mod_game_editor_ui <- function(id) {
       class = "game-editor-layout",
       div(
         "Select existing game",
-        selectInput(
+        wellPanel(selectInput(
           inputId = ns("game"),
           label = "",
           choices = ""
-        ),
+        )),
         "or enter new game",
         wellPanel(
+          no_autofill(textInput(
+            inputId = ns("new_game_title"),
+            label = "Manual entry",
+            placeholder = "Game title"
+          )),
           actionButton(
             inputId = ns("new_game_manual"),
-            label = "Manual entry"
-          ),
+            label = "Create"
+          )
+        ),
+        # .no-num-ticks: the steppers would edit an external id by clicking,
+        # which is never what the editor means to do.
+        wellPanel(
+          class = "no-num-ticks",
+          # value = NULL, not NA: formatNoSci() would write value="NA" into the
+          # tag, an invalid number the browser then marks.
+          no_autofill(numericInput(
+            inputId = ns("new_game_mobygames_id"),
+            label = "MobyGames ID",
+            value = NULL,
+            min = 1,
+            step = 1
+          )),
           actionButton(
             inputId = ns("new_game_api"),
-            label = "MobyGames ID"
+            label = "Fetch"
           )
         )
       ),
@@ -65,10 +84,7 @@ mod_game_editor_ui <- function(id) {
 #' @noRd
 mod_game_editor_server <- function(id, pool, user) {
   moduleServer(id, function(input, output, session) {
-    # The helpers live in mod_game_editor_fct.R but are evaluated in this frame,
-    # so they can use input/session/loc/ns/... without argument plumbing.
     define_game_editor_helpers(environment())
-
     ns <- session$ns
     loc <- reactiveValues(observer_game_editor = 0, selected_game = NULL)
 
@@ -78,11 +94,13 @@ mod_game_editor_server <- function(id, pool, user) {
     # and the handler is isolated, so input$game is read as it stands. With
     # nothing to select, the blank entry is used, which hides the editor UI
     # (its outputs req() on input$game) until another game is picked.
+    # add_gidb_ids() decorates the labels for display only; the ids stay the
+    # values, so input$game is a plain gidb_id everywhere else.
     observeEvent(loc$observer_game_editor, {
       updateSelectInput(
         session = session,
         inputId = "game",
-        choices = c("", db_list_games(pool)),
+        choices = c("", add_gidb_ids(db_list_games(pool))),
         selected = loc$selected_game %||% input$game %||% ""
       )
       loc$selected_game <- NULL
@@ -111,22 +129,58 @@ mod_game_editor_server <- function(id, pool, user) {
 
     # New game ----
 
+    # The panels hold the page's first inputs, so a password manager can drop a
+    # stored username into the title before anyone types. A browser only reports
+    # its inputs once it is connected, which is the first moment they can be
+    # pushed back to empty -- ignoreNULL is what keeps this from firing earlier.
+    observeEvent(input$new_game_title, {
+      clear_new_game_inputs()
+    }, once = TRUE)
+
     # A title is all the games table requires, so a manual entry starts there
     # and the details are filled in through the editor of the game this creates.
     observeEvent(input$new_game_manual, {
-      create_game_manual_modal() # input$new_game_title
-    })
+      # game_title is NOT NULL; an empty value would reach SQL as NULL. Nothing
+      # closes on a rejected click since the input lives in the panel, so the
+      # reason has to be said out loud. isTRUE(): a cleared input can arrive as
+      # NULL, which req() used to halt on and if() would choke on.
+      if (!isTRUE(nzchar(trimws(input$new_game_title)))) {
+        showNotification(
+          "A title is required to create a game",
+          type = "warning"
+        )
+        clear_new_game_inputs()
+        return()
+      }
 
-    observeEvent(input$confirm_new_game, {
-      # game_title is NOT NULL; an empty value would reach SQL as NULL.
-      req(nzchar(trimws(input$new_game_title)))
       create_game_db()
     })
 
-    ## TODO ask for a MobyGames ID and fetch its metadata
-    # observeEvent(input$new_game_api, {
-    #   new_game_api_modal()
-    # })
+    # MobyGames ids are positive whole numbers without leading zeros. The
+    # numeric input keeps letters out but not a 0, and a decimal can be typed.
+    # as.character(): NULL (empty field) and NA both fail grepl, so a missing id
+    # is rejected the same way as a malformed one.
+    observeEvent(input$new_game_api, {
+      mobygames_id <- as.character(input$new_game_mobygames_id)
+      if (!isTRUE(grepl("^[1-9]\\d*$", mobygames_id))) {
+        showNotification(
+          paste(
+            "A MobyGames ID is required:",
+            "a whole number above 0, no leading zeros"
+          ),
+          type = "warning"
+        )
+        clear_new_game_inputs()
+        return()
+      }
+
+      ## TODO fetch the metadata of the id and create the game from them
+      showNotification(
+        "Fetching from MobyGames is not wired up yet",
+        type = "message"
+      )
+      clear_new_game_inputs()
+    })
 
     # Edit title  ----
 
@@ -137,8 +191,13 @@ mod_game_editor_server <- function(id, pool, user) {
 
     # Write the edited title, then refresh the selector labels
     observeEvent(input$confirm_edit_game_title, {
-      # An empty value would be coerced to SQL NULL by sql_null().
-      req(nzchar(trimws(input$edited_game_title)))
+      # An empty value would be coerced to SQL NULL by sql_null(). The modal
+      # staying open is a weak signal on its own, so name the problem as well.
+      if (!isTRUE(nzchar(trimws(input$edited_game_title)))) {
+        showNotification("The title cannot be empty", type = "warning")
+        return()
+      }
+
       edit_game_title_db()
     })
 

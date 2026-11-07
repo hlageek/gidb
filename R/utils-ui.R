@@ -23,6 +23,17 @@ text_input_blur <- function(
   tag
 }
 
+#' Keep stored values out of a shiny input.
+#'
+#' Neither textInput() nor numericInput() forwards extra arguments to the tag
+#' they build, so the attribute is appended to the <input> inside the wrapper
+#' div. Browsers treat this as a hint -- Chrome ignores it for credentials -- so
+#' the panels are cleared from the server as well.
+#' @noRd
+no_autofill <- function(tag) {
+  tagAppendAttributes(tag, autocomplete = "off", .cssSelector = "input")
+}
+
 #' textAreaInput that fires only on blur.
 #' @noRd
 text_area_blur <- function(
