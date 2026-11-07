@@ -33,10 +33,10 @@ mod_game_editor_ui <- function(id) {
             label = "Create"
           )
         ),
-        # .no-num-ticks: the steppers would edit an external id by clicking,
+        # .no-steppers: the steppers would edit an external id by clicking,
         # which is never what the editor means to do.
         wellPanel(
-          class = "no-num-ticks",
+          class = "no-steppers",
           # value = NULL, not NA: formatNoSci() would write value="NA" into the
           # tag, an invalid number the browser then marks.
           no_autofill(numericInput(
@@ -66,7 +66,8 @@ mod_game_editor_ui <- function(id) {
           bslib::accordion_panel(
             icon = bsicons::bs_icon("info-circle"),
             title = "Core info",
-            value = "core"
+            value = "core",
+            uiOutput(ns("panel_info_ui"), class = "game-identifiers")
           )
         )
       )
@@ -133,9 +134,13 @@ mod_game_editor_server <- function(id, pool, user) {
     # stored username into the title before anyone types. A browser only reports
     # its inputs once it is connected, which is the first moment they can be
     # pushed back to empty -- ignoreNULL is what keeps this from firing earlier.
-    observeEvent(input$new_game_title, {
-      clear_new_game_inputs()
-    }, once = TRUE)
+    observeEvent(
+      input$new_game_title,
+      {
+        clear_new_game_inputs()
+      },
+      once = TRUE
+    )
 
     # A title is all the games table requires, so a manual entry starts there
     # and the details are filled in through the editor of the game this creates.
@@ -226,6 +231,42 @@ mod_game_editor_server <- function(id, pool, user) {
       tagList(
         purrr::map(
           identifier_fields,
+          function(field) {
+            mod_game_item_ui(
+              id = ns(field$id),
+              type = field$type,
+              label = field$label
+            )
+          }
+        )
+      )
+    })
+
+    # Info UI -----
+    info_fields <- game_info_fields()
+
+    purrr::walk(
+      info_fields,
+      function(field) {
+        mod_game_item_server(
+          field$id,
+          label = field$label,
+          pool = pool,
+          user = user, # reactiveValues object
+          gidb_id = reactive(input$game),
+          table = "games",
+          column = field$column,
+          type = field$type
+        )
+      }
+    )
+
+    output$panel_info_ui <- renderUI({
+      req(input$game)
+
+      tagList(
+        purrr::map(
+          info_fields,
           function(field) {
             mod_game_item_ui(
               id = ns(field$id),

@@ -20,6 +20,7 @@ Table games {
   game_parent_id integer
   game_year integer // release year e.g. 1995
   game_url varchar
+  game_description text
   gidb_status varchar // e.g. published
   // internal metadata
   created_by integer
@@ -176,6 +177,7 @@ Table attachments {
   gidb_id integer
   sign_id integer
   source_id integer
+  attachment_name varchar
   attachment_path varchar [not null]
   attachment_filename varchar
   attachment_mime varchar // e.g. image/jpeg, image/png, video/mp4
@@ -204,7 +206,7 @@ Table signs {
   sign_id integer [pk, increment]
   gidb_id integer [not null]
   sign_name varchar [not null]
-  description text
+  sign_description text
   // internal metadata
   created_by integer
   modified_by integer

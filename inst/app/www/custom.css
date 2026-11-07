@@ -77,16 +77,16 @@
       }
 
       /* ── Hide the up/down steppers on number inputs ──
-         Put .no-num-ticks on any container of the input -- a .game-item wrapper,
+         Put .no-steppers on any container of the input -- a .game-item wrapper,
          a wellPanel, ... -- since shiny gives no way to class the input itself. */
       /* Chrome, Edge, Safari, Opera */
-      .no-num-ticks input[type="number"]::-webkit-outer-spin-button,
-      .no-num-ticks input[type="number"]::-webkit-inner-spin-button {
+      .no-steppers input[type="number"]::-webkit-outer-spin-button,
+      .no-steppers input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
       /* Firefox */
-      .no-num-ticks input[type="number"] {
+      .no-steppers input[type="number"] {
         -moz-appearance: textfield;
         appearance: textfield;
       }

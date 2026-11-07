@@ -10,9 +10,11 @@
 game_item_type <- function(type) {
   type <- type %||% "character"
 
-  if (!identical(type, "integer") &&
+  if (
+    !identical(type, "integer") &&
       !identical(type, "character") &&
-      !identical(type, "text")) {
+      !identical(type, "text")
+  ) {
     stop(
       "type must be \"integer\", \"character\" or \"text\", not \"",
       as.character(type)[1],
@@ -72,7 +74,7 @@ mod_game_item_ui <- function(id, type = NULL, label = NULL) {
     class = paste(
       c(
         "game-item",
-        "no-num-ticks",
+        "no-steppers",
         if (type == "text") "game-item-multiline"
       ),
       collapse = " "
