@@ -8,3 +8,13 @@ dev_history.R
 $run_dev.*
 ^.here$
 ^README\.Rmd$
+# Local secrets and tooling state, never part of the app bundle
+^gidb_users\.sqlite$
+^\.Renviron$
+^\.Rprofile$
+^\.claude$
+^\.posit$
+^\.vscode$
+^.*\.DS_Store$
+# Schema modelling sources (dbdiagram/dbml), the app reads the database itself
+^gidb_schema$
